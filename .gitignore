@@ -1,0 +1,3 @@
+2*.beancount
+csv/*.csv
+journals/*.journal

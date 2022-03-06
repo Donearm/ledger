@@ -1,0 +1,8 @@
+{ "commodities":
+  { "PLN":   { "provider": "ft_currency" }
+  , "GBP":   { "provider": "ft_currency" }
+  , "EUR":   { "provider": "ft_currency" }
+  , "CHF":   { "provider": "ft_currency" }
+  , "USD":   { "provider": "ft_currency" }
+  }
+}

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Monthly update of prices for Beancount, using pricehist
+# (https://gitlab.com/chrisberkhout/pricehist)
+
+
+# Save current month in decimal format (no leading 0)
+CURRENT_MONTH=$((10#$(date +%m)))
+
+# declare an associative array of currencies' pairs and output filenames
+declare -A PRICEPAIRS
+PRICEPAIRS['EUR/CHF']='eur_to_chf.prices'
+PRICEPAIRS['EUR/GBP']='eur_to_gbp.prices'
+PRICEPAIRS['EUR/MUR']='eur_to_mur.prices'
+PRICEPAIRS['EUR/MXN']='eur_to_mxn.prices'
+PRICEPAIRS['EUR/PLN']='eur_to_pln.prices'
+PRICEPAIRS['EUR/USD']='eur_to_usd.prices'
+PRICEPAIRS['GBP/EUR']='gbp_to_eur.prices'
+PRICEPAIRS['GBP/PLN']='gbp_to_pln.prices'
+PRICEPAIRS['MUR/EUR']='mur_to_eur.prices'
+PRICEPAIRS['MUR/PLN']='mur_to_pln.prices'
+PRICEPAIRS['MUR/USD']='mur_to_usd.prices'
+PRICEPAIRS['PLN/CHF']='pln_to_chf.prices'
+PRICEPAIRS['PLN/EUR']='pln_to_eur.prices'
+PRICEPAIRS['PLN/GBP']='pln_to_gbp.prices'
+PRICEPAIRS['PLN/MUR']='pln_to_mur.prices'
+PRICEPAIRS['PLN/MXN']='pln_to_mxn.prices'
+PRICEPAIRS['USD/EUR']='usd_to_eur.prices'
+PRICEPAIRS['USD/EUR']='usd_to_eur.prices'
+PRICEPAIRS['USD/MUR']='usd_to_mur.prices'
+PRICEPAIRS['USD/MXN']='usd_to_mxn.prices'
+PRICEPAIRS['USD/PLN']='usd_to_pln.prices'
+
+# if January, save December prices. Otherwise, subtract 1 to get the 
+# previous month
+if [ $CURRENT_MONTH -eq 1 ]; then
+	$UPDATE_MONTH=12
+else
+	let UPDATE_MONTH=$CURRENT_MONTH-1
+fi
+
+for i in "${!PRICEPAIRS[@]}"; do
+	echo "Updating $i prices..."
+	pricehist fetch alphavantage $i -s 2022-0${UPDATE_MONTH}-01 -e 2022-0${CURRENT_MONTH}-01 -o beancount >> ${PRICEPAIRS[$i]}
+	# We have to sleep for a minute after every call because 
+	# alphavantage has a 5 calls/minute API rate limit
+	sleep 60
+done
+
+exit 0

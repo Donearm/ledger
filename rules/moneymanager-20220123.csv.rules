@@ -1,0 +1,87 @@
+skip 1
+
+fields date, ,category, ,description, , , , amount, currency, ,
+
+date-format %m/%d/%Y %H:%M:%S
+
+description %category %description
+
+currency PLN
+
+account1 Assets:Bank-Millennium
+;account2 Expenses:Groceries
+;account3 Expenses:Restaurants-and-Food-Out
+;account4 Expenses:Drinks
+;account5 Expenses:Beauty
+;account6 Expenses:Transportation:Public-Transportation
+;account7 Expenses:Transportation:Car-Rental
+;account8 Expenses:Travel
+;account9 Expenses:Household
+;account10 Expenses:House-Supplies-and-Appliances
+;account11 Expenses:Electronics
+;account12 Expenses:Apparel
+;account13 Expenses:Health
+;account14 Expenses:Education
+;account15 Expenses:Culture
+;account16 Expenses:Gift
+;account17 Expenses:Other
+;account18 Expenses:Social-Life
+;account19 Expenses:Subscriptions
+;account20 Income:Bonus
+
+if %category Groceries
+  account2 Expenses:Groceries
+
+if %category Restaurants and food out
+  account2 Expenses:Restaurants-and-Food-Out
+
+if %category Drinks
+  account2 Expenses:Drinks
+
+if %category Beauty
+  account2 Expenses:Beauty
+
+if %category Public Transportation
+  account2 Expenses:Transportation:Public-Transportation
+
+if %category Car rental
+  account2 Expenses:Transportation:Car-Rental
+
+if %category Travels and accommodations
+  account2 Expenses:Travel
+
+if %category Household
+  account2 Expenses:Household
+
+if %category House supplies/appliances
+  account2 Expenses:House-Supplies-and-Appliances
+
+if %category Electronics
+  account2 Expenses:Electronics
+
+if %category Apparel
+  account2 Expenses:Apparel
+
+if %category Health
+  account2 Expenses:Health
+
+if %category Education
+  account2 Expenses:Education
+
+if %category Culture
+  account2 Expenses:Culture
+
+if %category Gift
+  account2 Expenses:Gift
+
+if %category Other
+  account2 Expenses:Other
+
+if %category Social Life
+  account2 Expenses:Social-Life
+
+if %category Subscriptions
+  account2 Expenses:Subscriptions
+
+if %category Bonus
+  account2 Income:Bonus

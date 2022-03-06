@@ -1,0 +1,66 @@
+Ledger 3.2.1-20200518, the command-line accounting tool
+
+Copyright (c) 2003-2019, John Wiegley.  All rights reserved.
+
+This program is made available under the terms of the BSD Public License.
+See LICENSE file included with the distribution for details and disclaimer.
+account Assets:Bank-Bpm
+account Assets:Bank-Bpm:Conto-Deposito
+account Assets:Bank-Millennium
+account Assets:Fiver
+account Assets:Kraken
+account Assets:Paypal
+account Assets:Upwork
+account Assets:Wise
+account Expenses:Apparel
+account Expenses:ATM
+account Expenses:Beauty
+account Expenses:Culture
+account Expenses:Card:Cartaimpronta
+account Expenses:Drinks
+account Expenses:Education
+account Expenses:Electronics
+account Expenses:Food-Delivery
+account Expenses:Gift
+account Expenses:Groceries
+account Expenses:Health
+account Expenses:Health:Doctors
+account Expenses:Health:Medicines
+account Expenses:House-Supplies-Appliances
+account Expenses:Household
+account Expenses:Household:Gdansk
+account Expenses:Household:Krakow
+account Expenses:Household:Warsaw
+account Expenses:Other
+account Expenses:Restaurants-and-Food-Out
+account Expenses:Social-Life
+account Expenses:Subscriptions
+account Expenses:Taxes:Italy
+account Expenses:Taxes:Poland
+account Expenses:Transportation
+account Expenses:Transportation:Car-Rental
+account Expenses:Transportation:Flights
+account Expenses:Transportation:Public-Transportation
+account Expenses:Transportation:Ships
+account Expenses:Transportation:Taxi
+account Expenses:Transportation:Trains
+account Expenses:Travel
+account Expenses:Travel:Accommodations
+account Income
+account Income:Advertising
+account Income:Advertising:Adsense
+account Income:Advertising:Amazon
+account Income:Fiverr-Gig
+account Income:Freelancing
+account Income:From-Parents
+account Income:From-Valeria
+account Income:Salary
+account Income:Taxes:Italy
+account Income:Upwork-Gig
+
+; vim commands to fix the csv import
+; :%s/PLN\([0-9]\)/PLN\-\1/g
+; :%s/PLN[0-9]/PLN\-[0-9]/g
+; :s/income:unknown/Expenses:Restaurants-and-Food-Out/
+: :s/income:unknown/Expenses:Food-Delivery/
+: :s/PLN/EUR/g

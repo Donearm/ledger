@@ -1,0 +1,11 @@
+skip 1
+
+fields ,date, amount, currency, description, , , exchangefrom, exchangeto, exchangerate, , , , , , , , , fees
+
+date-format %d-%m-%Y
+
+description %description
+
+currency USD
+
+account1 Assets:Wise

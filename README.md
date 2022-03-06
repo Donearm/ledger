@@ -62,7 +62,7 @@ SELECT
 
 Select all transactions in an account matching a specific word:
 
-``sql
+```sql
 SELECT
   date, account, position, balance
 WHERE
@@ -74,6 +74,7 @@ WHERE
 A Perl [script](https://github.com/beancount/ledger2beancount) is available.
 
 It unfortunately fails at transactions whose amount is registered as:
+
 ```
 EUR-1000
 ```

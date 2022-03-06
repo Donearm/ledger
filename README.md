@@ -120,8 +120,8 @@ How Wise exports in csv a currency (limited to one year only):
 "TransferWise ID",Date,Amount,Currency,Description,"Payment Reference","Running Balance","Exchange From","Exchange To","Exchange Rate","Payer Name","Payee Name","Payee Account Number",Merchant,"Card Last Four Digits","Card Holder Full Name",Attachment,Note,"Total fees"
 BALANCE-16853605,31-01-2019,-11.62,CHF,"Converted CHF to EUR",,0.00,CHF,EUR,0.87866,,,,,,,,,0.03
 BALANCE-16853605,31-01-2019,-0.03,CHF,"Wise Charges for: BALANCE-16853605",,11.62,,,,,,,,,,,,0
-CARD-8789487,26-01-2019,-64.36,CHF,"Card transaction of GBP issued by Restaurant Papa Joe's Basel",,11.65,CHF,GBP,0.76274,,,,"Restaurant Papa Joe's Basel",,,,,0.19
-CARD-8789487,26-01-2019,-0.19,CHF,"Wise Charges for: CARD-8789487",,76.01,,,,,,,"Restaurant Papa Joe's Basel",,,,,0
+CARD-*****87,26-01-2019,-64.36,CHF,"Card transaction of GBP issued by Restaurant Papa Joe's Basel",,11.65,CHF,GBP,0.76274,,,,"Restaurant Papa Joe's Basel",,,,,0.19
+CARD-*****87,26-01-2019,-0.19,CHF,"Wise Charges for: CARD-*****87",,76.01,,,,,,,"Restaurant Papa Joe's Basel",,,,,0
 ```
 
 which can be cleaned up to show only the essential fields:

@@ -3,6 +3,7 @@
 # Monthly update of prices for Beancount, using pricehist
 # (https://gitlab.com/chrisberkhout/pricehist)
 
+CURRENT_YEAR=$(date +%Y)
 
 # Save current month in decimal format (no leading 0)
 CURRENT_MONTH=$((10#$(date +%m)))
@@ -41,7 +42,7 @@ fi
 
 for i in "${!PRICEPAIRS[@]}"; do
 	echo "Updating $i prices..."
-	pricehist fetch alphavantage $i -s 2022-0${UPDATE_MONTH}-01 -e 2022-0${CURRENT_MONTH}-01 -o beancount >> ${PRICEPAIRS[$i]}
+	pricehist fetch alphavantage $i -s ${CURRENT_YEAR}-0${UPDATE_MONTH}-01 -e ${CURRENT_YEAR}-0${CURRENT_MONTH}-01 -o beancount >> ${PRICEPAIRS[$i]}
 	# We have to sleep for a minute after every call because 
 	# alphavantage has a 5 calls/minute API rate limit
 	sleep 60

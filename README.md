@@ -83,6 +83,18 @@ GROUP BY 1
 ORDER BY 1;
 ```
 
+It is easy from this example to check the earnings by month ("Assets:") or by 
+checking the expenses of a specific category using a sub-account of "Expenses".
+
+Show all accounts' balance, converted into a specific currency:
+
+```sql
+SELECT
+  account, convert(sum(position), 'PLN')
+GROUP BY 1
+ORDER BY 1;
+```
+
 # Ledger to beancount
 
 A Perl [script](https://github.com/beancount/ledger2beancount) is available.

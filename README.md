@@ -1,6 +1,6 @@
 # Ledger
 
-My double entry accounting files. Plus, a collection of commands, queries, and 
+My double entry accounting files. Plus, a collection of commands, queries, and
 rules to analyze the transactions with (h)ledger and beancount.
 
 ## Folder organization
@@ -67,6 +67,20 @@ SELECT
   date, account, position, balance
 WHERE
   account ~ 'Ship';
+```
+
+Expenses for each month of a selected year, in a specific currency:
+
+```sql
+SELECT
+  MONTH(date) AS month,
+  SUM(COST(position)) AS balance
+WHERE
+   account ~ 'Expenses:' AND
+   currency = 'EUR' AND
+   YEAR(date) = 2021
+GROUP BY 1
+ORDER BY 1;
 ```
 
 # Ledger to beancount

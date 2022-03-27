@@ -1,3 +1,15 @@
+<!-- vim-markdown-toc GFM -->
+
+* [Ledger](#ledger)
+	* [Folder organization](#folder-organization)
+* [Beancount](#beancount)
+	* [Reports](#reports)
+* [Ledger to beancount](#ledger-to-beancount)
+* [Importers](#importers)
+	* [Kraken](#kraken)
+
+<!-- vim-markdown-toc -->
+
 # Ledger
 
 My double entry accounting files. Plus, a collection of commands, queries, and
@@ -120,41 +132,6 @@ And
 The latter is necessary to remove the `+` sign in front of the amount as the script fails at those. The `-` sign is instead fine to keep.
 
 # Importers
-
-## Revolut
-
-Example of a statement for a single account (aka, currency) exported from Revolut:
-
-```csv
-Type,Product,Started Date,Completed Date,Description,Amount,Fee,Currency,State,Balance
-TOPUP,Current,2021-02-11 14:44:23,2021-02-11 14:44:45,Top-Up by *5729,250.00,0.00,PLN,COMPLETED,488.26
-CARD_PAYMENT,Current,2021-02-11 14:46:58,2021-02-12 05:00:04,Payu*allegro,-386.46,0.00,PLN,COMPLETED,101.80
-EXCHANGE,Current,2021-02-19 14:18:39,2021-02-19 14:18:39,Revolut Ltd,76.06,1.90,PLN,COMPLETED,175.96
-```
-
-To clean it up, use awk:
-
-```awk
-awk 'BEGIN {FS = ","} {print $1" "$3" "$4" "$5" "$6" "$7" "$8}'
-```
-
-## Wise
-
-How Wise exports in csv a currency (limited to one year only):
-
-```csv
-"TransferWise ID",Date,Amount,Currency,Description,"Payment Reference","Running Balance","Exchange From","Exchange To","Exchange Rate","Payer Name","Payee Name","Payee Account Number",Merchant,"Card Last Four Digits","Card Holder Full Name",Attachment,Note,"Total fees"
-BALANCE-16853605,31-01-2019,-11.62,CHF,"Converted CHF to EUR",,0.00,CHF,EUR,0.87866,,,,,,,,,0.03
-BALANCE-16853605,31-01-2019,-0.03,CHF,"Wise Charges for: BALANCE-16853605",,11.62,,,,,,,,,,,,0
-CARD-*****87,26-01-2019,-64.36,CHF,"Card transaction of GBP issued by Restaurant Papa Joe's Basel",,11.65,CHF,GBP,0.76274,,,,"Restaurant Papa Joe's Basel",,,,,0.19
-CARD-*****87,26-01-2019,-0.19,CHF,"Wise Charges for: CARD-*****87",,76.01,,,,,,,"Restaurant Papa Joe's Basel",,,,,0
-```
-
-which can be cleaned up to show only the essential fields:
-
-```awk
-awk 'BEGIN {FS = ","} {print $2" "$3" "$4" "$5" "$8" "$9" "$10" "$19}'
-```
 
 ## Kraken
 

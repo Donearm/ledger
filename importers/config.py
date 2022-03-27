@@ -24,10 +24,18 @@ sys.path.append(os.path.dirname(__file__))
 
 import bankmillennium
 import paypal
+import revolut
+import wise
 
 CONFIG = [
-        #bankmillennium.MillenniumPLNImporter('Assets:Bank-Millennium', '0000'),
-        #bankmillennium.MillenniumEURImporter('Assets:Bank-Millennium', '0000'),
-        #bankmillennium.MillenniumUSDImporter('Assets:Bank-Millennium', '0000'),
+        bankmillennium.MillenniumPLNImporter('Assets:Bank-Millennium', '0000'),
+        bankmillennium.MillenniumEURImporter('Assets:Bank-Millennium', '0000'),
+        bankmillennium.MillenniumUSDImporter('Assets:Bank-Millennium', '0000'),
         paypal.PaypalImporter('Assets:Paypal', '0000'),
+        revolut.RevolutUSDImporter('Assets:Revolut', '0000'),
+        revolut.RevolutPLNImporter('Assets:Revolut', '0000'),
+        revolut.RevolutEURImporter('Assets:Revolut', '0000'),
+        wise.WiseEURImporter('Assets:Wise', '0000'),
+        wise.WisePLNImporter('Assets:Wise', '0000'),
+        wise.WiseUSDImporter('Assets:Wise', '0000'),
         ]

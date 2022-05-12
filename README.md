@@ -1,6 +1,8 @@
+# Ledger
+
 <!-- vim-markdown-toc GFM -->
 
-* [Ledger](#ledger)
+* [What is this](#what-is-this)
 	* [Folder organization](#folder-organization)
 * [Beancount](#beancount)
 	* [Reports](#reports)
@@ -10,7 +12,7 @@
 
 <!-- vim-markdown-toc -->
 
-# Ledger
+# What is this
 
 My double entry accounting files. Plus, a collection of commands, queries, and
 rules to analyze the transactions with (h)ledger and beancount.

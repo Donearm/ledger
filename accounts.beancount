@@ -14,6 +14,9 @@
 2013-01-01 open Assets:Paypal
 2019-01-01 open Assets:Revolut
 2019-01-01 open Assets:Revolut:Crypto:AMP
+2022-01-01 open Assets:Revolut:Crypto:BTC
+2022-01-01 open Assets:Revolut:Crypto:DOT
+2022-01-01 open Assets:Revolut:Crypto:ETH
 2019-01-01 open Assets:Revolut:Crypto:XRP
 2013-01-01 open Assets:Upwork
 2013-01-01 open Assets:Wise
@@ -79,8 +82,11 @@
 ; Commodities
 2013-01-01 commodity ADA
 2013-01-01 commodity AMP
+2013-01-01 commodity BTC
 2013-01-01 commodity CHF
 2013-01-01 commodity DASH
+2013-01-01 commodity DOT
+2013-01-01 commodity ETH
 2013-01-01 commodity EUR
 2013-01-01 commodity MUR
 2013-01-01 commodity MXN

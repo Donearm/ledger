@@ -17,8 +17,8 @@ option "operating_currency" "EUR"
 option "operating_currency" "PLN"
 option "operating_currency" "USD"
 
-
 option "inferred_tolerance_default" "*:0.01"
+option "title" "Gianluca Fiore's Ledger"
 ; Save any rounding error in currencies conversions into a specific
 ; account
 ; Unfortunately this was removed, check https://github.com/beancount/beancount/issues/337

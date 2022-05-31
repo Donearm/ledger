@@ -4,6 +4,8 @@
 # (https://gitlab.com/chrisberkhout/pricehist)
 
 CURRENT_YEAR=$(date +%Y)
+PRICEHIST=/home/gianluca/.local/bin/pricehist
+PRICES_DIR=/home/gianluca/.ledger/prices/
 
 # Save current month in decimal format (no leading 0)
 CURRENT_MONTH=$((10#$(date +%m)))
@@ -43,10 +45,13 @@ fi
 
 for i in "${!PRICEPAIRS[@]}"; do
 	echo "Updating $i prices..."
-	pricehist fetch alphavantage $i -s ${CURRENT_YEAR}-0${UPDATE_MONTH}-01 -e ${CURRENT_YEAR}-0${CURRENT_MONTH}-01 -o beancount >> ${PRICEPAIRS[$i]}
+	$PRICEHIST fetch alphavantage $i -s ${CURRENT_YEAR}-0${UPDATE_MONTH}-01 -e ${CURRENT_YEAR}-0${CURRENT_MONTH}-01 -o beancount >> ${PRICES_DIR}${PRICEPAIRS[$i]}
 	# We have to sleep for a minute after every call because 
 	# alphavantage has a 5 calls/minute API rate limit
 	sleep 60
+	# meanwhile, we can sort and "uniq" the file to remove duplicate 
+	# entries and have all nicely ordered
+	sort -u "${PRICES_DIR}${PRICEPAIRS[$i]}" -o "${PRICES_DIR}${PRICEPAIRS[$i]}" 
 done
 
 exit 0

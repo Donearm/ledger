@@ -1,0 +1,9 @@
+[Unit]
+Description=Update currency prices for Beancount ledger
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/gianluca/.ledger/prices/price_history_update.sh
+Restart=on-failure
+

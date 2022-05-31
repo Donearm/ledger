@@ -17,3 +17,7 @@ Best tool to download prices from a range of sources. The basic syntax for beanc
 ```sh
 pricehist fetch alphavantage EUR/MUR -s 2018-01-01 -e 2019-01-01 -o beancount > eur_to_mur.prices
 ```
+
+# SystemD service and timer
+
+For an automated updating of the prices, a systemd service and timer units are included. By default the timer runs the service on the first day of the month.

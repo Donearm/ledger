@@ -1,0 +1,10 @@
+[Unit]
+Description=Update currency prices for ledger
+
+[Timer]
+OnCalendar=*-*-1 20:00:00
+Persistent=true
+Unit=update_prices.service
+
+[Install]
+WantedBy=base.target

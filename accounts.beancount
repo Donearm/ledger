@@ -21,6 +21,8 @@
 2013-01-01 open Assets:Upwork
 2013-01-01 open Assets:Wise
 2013-01-01 open Equity:RoundingError
+2022-06-01 open Expenses:Animals
+2022-06-01 open Expenses:Animals:Food
 2013-01-01 open Expenses:Apparel
 2013-01-01 open Expenses:Bank-Commissions
 2013-01-01 open Expenses:Beauty
@@ -32,6 +34,7 @@
 2013-01-01 open Expenses:Fees
 2013-01-01 open Expenses:Food-Delivery
 2013-01-01 open Expenses:Gift
+2013-01-01 open Expenses:Gift:Charity
 2013-01-01 open Expenses:Groceries
 2013-01-01 open Expenses:Health
 2013-01-01 open Expenses:Health:Doctors

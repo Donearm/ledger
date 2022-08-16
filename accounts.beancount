@@ -2,6 +2,9 @@
 2013-01-01 open Assets:Bank-Bpm
 2013-01-01 open Assets:Bank-Bpm:Conto-Deposito
 2013-01-01 open Assets:Bank-Millennium
+2018-11-18 open Assets:Bank-Santander
+2018-11-18 open Assets:Bank-Santander:Deposit
+2013-01-01 open Assets:Bank-T-Mobile
 2013-01-01 open Assets:Cash
 2013-01-01 open Assets:Fiverr
 2013-01-01 open Assets:Investments:Funds
@@ -44,6 +47,7 @@
 2013-01-01 open Expenses:Household:Krakow
 2013-01-01 open Expenses:Household:Warsaw
 2013-01-01 open Expenses:Learning
+2013-01-01 open Expenses:Loan-Repayment
 2013-01-01 open Expenses:Other
 2013-01-01 open Expenses:Restaurants-and-Food-Out
 2013-01-01 open Expenses:Social-Life
@@ -63,6 +67,7 @@
 2013-01-01 open Expenses:Transportation:Trains
 2013-01-01 open Expenses:Travel
 2013-01-01 open Expenses:Travel:Accommodations
+2013-01-01 open Expenses:Utilities
 2013-01-01 open Income:Advertising:Adsense
 2013-01-01 open Income:Advertising:Amazon
 2013-01-01 open Income:Bonus

@@ -153,3 +153,45 @@ class WiseUSDImporter(importer.ImporterProtocol):
                 entries.append(txn)
 
         return entries
+
+class WiseIDRImporter(importer.ImporterProtocol):
+    def __init__(self, account, lastfour):
+        self.account = account
+        self.lastfour = lastfour
+
+    def identify(self, f):
+        """Regular expression to match Wise csv export's filename"""
+
+        return re.match('statement_39423616_IDR_[0-9-_]*\.csv', os.path.basename(f.name))
+
+    def extract(self, f):
+        entries = []
+
+        with open(f.name) as f:
+            for index, row in enumerate(csv.DictReader(f)):
+                # dayfirst option must be present as the date format of Wise is %d-%m-%Y
+                trans_date = parse(row['Date'], dayfirst=True).date()
+                trans_desc = row['Description']
+                trans_amt = row['Amount']
+
+                meta = data.new_metadata(f.name, index)
+
+                txn = data.Transaction(
+                        meta = meta,
+                        date = trans_date,
+                        flag = flags.FLAG_OKAY,
+                        payee = trans_desc,
+                        narration = "",
+                        tags = set(),
+                        links = set(),
+                        postings = [],
+                        )
+
+                txn.postings.append(
+                        data.Posting(self.account, amount.Amount(D(trans_amt), 'IDR'),
+                            None, None, None, None)
+                        )
+                
+                entries.append(txn)
+
+        return entries

@@ -11,3 +11,9 @@ _unless otherwise specified, the date is always included_
 * Revolut: 2022-05-19
 * Revolut-Sylwia: never
 * Wise: 2022-05-19
+
+=== URLs
+
+Exact URLs for each account above where full/partial statements can be downloaded.
+
+* Paypal: https://www.paypal.com/reports/statements/custom

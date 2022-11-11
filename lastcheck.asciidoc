@@ -7,13 +7,14 @@ _unless otherwise specified, the date is always included_
 * Bank-T-Mobile: never
 * Kraken: 2022-05-19
 * N26: never
-* Paypal: 2022-05-19
+* Paypal: 2022-11-11
 * Revolut: 2022-05-19
 * Revolut-Sylwia: never
-* Wise: 2022-05-19
+* Wise: 2022-11-11
 
 === URLs
 
 Exact URLs for each account above where full/partial statements can be downloaded.
 
 * Paypal: https://www.paypal.com/reports/statements/custom
+* Wise: https://wise.com/balances/statements/standard?balance_id=2100952

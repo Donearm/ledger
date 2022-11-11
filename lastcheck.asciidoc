@@ -8,7 +8,7 @@ _unless otherwise specified, the date is always included_
 * Kraken: 2022-05-19
 * N26: never
 * Paypal: 2022-11-11
-* Revolut: 2022-05-19
+* Revolut: 2022-11-11
 * Revolut-Sylwia: never
 * Wise: 2022-11-11
 
@@ -17,4 +17,8 @@ _unless otherwise specified, the date is always included_
 Exact URLs for each account above where full/partial statements can be downloaded.
 
 * Paypal: https://www.paypal.com/reports/statements/custom
+* Revolut:
+	* EUR: https://app.revolut.com/accounts/3b44d82d-6fc8-4d75-ab2f-d1dca3702c1c/statement
+	* PLN: https://app.revolut.com/accounts/9f7976fb-6285-4d6e-8d4e-678195568125/statement
+	* USD: https://app.revolut.com/accounts/c2a4b87a-26a7-42e7-9447-8a76a7fc0e99/statement
 * Wise: https://wise.com/balances/statements/standard?balance_id=2100952

@@ -35,7 +35,7 @@ class RevolutPLNImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en_8478fa\.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en_PLN_[a-z0-9]*\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -77,7 +77,7 @@ class RevolutEURImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en_8ad7f6\.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en_EUR_[a-z0-9]*\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -118,7 +118,7 @@ class RevolutUSDImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en_ee204c\.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en_USD_[a-z0-9]*\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []

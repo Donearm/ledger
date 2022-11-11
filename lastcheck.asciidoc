@@ -1,0 +1,12 @@
+=== Accounts' last checked date
+
+_unless otherwise specified, the date is always included_
+
+* Bank-Santander: 2022-08-15
+* Bank-Millennium:
+* Kraken:
+* N26:
+* Paypal:
+* Revolut:
+* Revolut-Sylwia:
+* Wise:

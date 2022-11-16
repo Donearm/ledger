@@ -3,7 +3,7 @@
 _unless otherwise specified, the date is always included_
 
 * Bank-Santander: 2022-08-15
-* Bank-Millennium: 2022-05-19
+* Bank-Millennium: 2022-11-11
 * Bank-T-Mobile: never
 * Kraken: 2022-05-19
 * N26: never
@@ -16,6 +16,7 @@ _unless otherwise specified, the date is always included_
 
 Exact URLs for each account above where full/partial statements can be downloaded.
 
+* Bank Millennium: https://www.bankmillennium.pl/osobiste2/AccountActivity
 * Paypal: https://www.paypal.com/reports/statements/custom
 * Revolut:
 	* EUR: https://app.revolut.com/accounts/3b44d82d-6fc8-4d75-ab2f-d1dca3702c1c/statement

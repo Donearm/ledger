@@ -1,3 +1,4 @@
 2*.beancount
 csv/*.csv
 journals/*.journal
+things_to_check.md

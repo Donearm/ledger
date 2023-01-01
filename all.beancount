@@ -9,6 +9,7 @@ include "2019.beancount"
 include "2020.beancount"
 include "2021.beancount"
 include "2022.beancount"
+include "2023.beancount"
 
 ; prices
 include "prices/*.prices"

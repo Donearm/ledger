@@ -42,7 +42,7 @@ class RevolutPLNImporter(importer.ImporterProtocol):
 
         with open(f.name) as f:
             for index, row in enumerate(csv.DictReader(f)):
-                trans_date = parse(row['Completed Date']).date()
+                trans_date = parse(row['Completed Date']).strip().date()
                 trans_desc = row['Description']
                 trans_amt = row['Amount']
 
@@ -84,7 +84,7 @@ class RevolutEURImporter(importer.ImporterProtocol):
 
         with open(f.name, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
-                trans_date = parse(row['Completed Date']).date()
+                trans_date = parse(row['Completed Date']).strip().date()
                 trans_desc = row['Description']
                 trans_amt = row['Amount']
 
@@ -125,7 +125,7 @@ class RevolutUSDImporter(importer.ImporterProtocol):
 
         with open(f.name) as f:
             for index, row in enumerate(csv.DictReader(f)):
-                trans_date = parse(row['Completed Date']).date()
+                trans_date = parse(row['Completed Date']).strip().date()
                 trans_desc = row['Description']
                 trans_amt = row['Amount']
 

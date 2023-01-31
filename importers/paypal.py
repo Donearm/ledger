@@ -45,8 +45,8 @@ class PaypalImporter(importer.ImporterProtocol):
         with open(f.name, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
                 trans_date = parse(row['Date']).date()
-                trans_desc = row['Type'] + ' ' + row['Note']
-                trans_amt = row['Balance']
+                trans_desc = row['Bank Name'] + ' ' + row['Bank Account'] + ' ' + row['Description']
+                trans_amt = row['Net']
                 trans_currency = row['Currency']
 
                 meta = data.new_metadata(f.name, index)

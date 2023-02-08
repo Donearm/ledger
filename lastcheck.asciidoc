@@ -3,7 +3,7 @@
 _unless otherwise specified, the date is always included_
 
 * Bank-Santander: 2023-02-06
-* Bank-Millennium: 2023-01-01
+* Bank-Millennium: 2023-02-07
 * Bank-T-Mobile: never
 * Kraken: 2022-05-19
 * N26: 2022-12-27

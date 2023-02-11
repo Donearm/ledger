@@ -1,4 +1,5 @@
 2*.beancount
 csv/*.csv
+importers/paypal-beangulp.py
 journals/*.journal
 things_to_check.md

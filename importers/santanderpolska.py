@@ -38,7 +38,7 @@ class SantanderPolskaImporter(importer.ImporterProtocol):
 
         # Santander Polska doesn't make a difference between credit card's statements and saving account's ones in the name
         # Therefore, the format is identical
-        return re.match('historia_[0-9]*-[0-9]*-[0-9]*_[0-9]*\.csv', os.path.basename(f.name))
+        return re.match('[nowa\s]*historia_[0-9]*-[0-9]*-[0-9]*_[0-9]*\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []

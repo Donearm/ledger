@@ -20,14 +20,17 @@ import (
 	"os"
 	"io"
 	"regexp"
+	"strings"
 )
 
 // Regexp to match the statement filenames of Bank Millennium and Bank Santander 
 // Polska
-var millenniumCsv = regexp.MustCompile(`^Account_activity_*`)
-var santanderCsv = regexp.MustCompile(`^historia_*`)
+var millenniumCsv = regexp.MustCompile(`^(Downloads/)?Account_activity_*`)
+var santanderCsv = regexp.MustCompile(`^(Downloads/)?historia_*`)
+var santanderNewCsv	= regexp.MustCompile(`^(Downloads/)?nowa historia_*`)
 
 func csvReader() {
+	fmt.Println(os.Args[1])
 	csvFile, err := os.Open(os.Args[1])
 	if err != nil {
 		fmt.Println("An error encountered while opening file", err)
@@ -37,8 +40,8 @@ func csvReader() {
 	reader := csv.NewReader(csvFile)
 	reader.LazyQuotes = true // Bank Millennium csv needs this
 
-	total_debit := 0.00
-	debit := 0.00
+	var total_debit float64
+	var debit float64
 	for i := 2 ;; i = i + 1 {
 		record, err := reader.Read()
 		if err == io.EOF {
@@ -48,14 +51,33 @@ func csvReader() {
 			return
 		}
 
+		// A convoluted way to remove - in front of negative numbers to make 
+		// them positive, and to change the comma into points
+		// This was born out of the impossibility to chain math.Abs to 
+		// strconv.ParseFloat and strconv.ParseInt 
+		// Impossibility here meaning "I can't be bothered to understand how 
+		// and prefer an ugly hack for the moment"
 		if millenniumCsv.MatchString(os.Args[1]) {
-			debit, _ := strconv.ParseFloat(record[7], 8)
+			recordStr := strings.Replace(record[7], ",", ".", -1)
+			recordStr = strings.Replace(recordStr, "-", "", -1)
+			debit, _ := strconv.ParseFloat(recordStr, 64)
 			total_debit += debit
 		} else if santanderCsv.MatchString(os.Args[1]) {
-			debit, _ := strconv.ParseFloat(record[8], 8)
+			fmt.Println("This matched with santanderCsv")
+			recordStr := strings.Replace(record[5], ",", ".", -1)
+			recordStr = strings.Replace(recordStr, "-", "", -1)
+			debit, _ := strconv.ParseFloat(recordStr, 64)
+			total_debit += debit
+		} else if santanderNewCsv.MatchString(os.Args[1]) {
+			fmt.Println("This matched with santanderNewCsv")
+			recordStr := strings.Replace(record[5], ",", ".", -1)
+			recordStr = strings.Replace(recordStr, "-", "", -1)
+			debit, _ := strconv.ParseFloat(recordStr, 64)
 			total_debit += debit
 		} else {
-			debit, _ := strconv.ParseFloat(record[7], 8)
+			recordStr := strings.Replace(record[7], ",", ".", -1)
+			recordStr = strings.Replace(recordStr, "-", "", -1)
+			debit, _ := strconv.ParseFloat(recordStr, 64)
 			total_debit += debit
 		}
 

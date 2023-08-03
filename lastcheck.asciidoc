@@ -23,4 +23,5 @@ Exact URLs for each account above where full/partial statements can be downloade
 	* EUR: https://app.revolut.com/accounts/3b44d82d-6fc8-4d75-ab2f-d1dca3702c1c/statement
 	* PLN: https://app.revolut.com/accounts/9f7976fb-6285-4d6e-8d4e-678195568125/statement
 	* USD: https://app.revolut.com/accounts/c2a4b87a-26a7-42e7-9447-8a76a7fc0e99/statement
+* Santander: https://www.centrum24.pl/centrum24-web/multi/history?x=VFCER6ziTDk#/history?dp=l&p=1
 * Wise: https://wise.com/balances/statements/standard

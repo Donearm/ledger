@@ -33,7 +33,8 @@ CONFIG = [
         #bankmillennium.MillenniumPLNImporter('Assets:Bank-Millennium', '0000'),
         #bankmillennium.MillenniumEURImporter('Assets:Bank-Millennium', '0000'),
         #bankmillennium.MillenniumUSDImporter('Assets:Bank-Millennium', '0000'),
-        #ksantanderpolska.SantanderPolskaImporter('Assets:Bank-Santander', '0000'),
+        santanderpolska.SantanderPolskaImporter('Assets:Bank-Santander', '0000'),
+        santanderpolska.SantanderPolskaEURImporter('Assets:Bank-Santander-Select', '0000'),
         #kraken.KrakenLedgerImporter('Assets:Kraken', '0000'),
         #kraken.KrakenTradeImporter('Assets:Kraken', '0000'),
         #paypal.PaypalImporter('Assets:Paypal', '0000'),
@@ -41,7 +42,6 @@ CONFIG = [
         #revolut.RevolutPLNImporter('Assets:Revolut', '0000'),
         #revolut.RevolutEURImporter('Assets:Revolut', '0000'),
         #wise.WiseEURImporter('Assets:Wise', '0000'),
-        #wise.WiseIDRImporter('Assets:Wise', '0000'),
         #wise.WisePLNImporter('Assets:Wise', '0000'),
         #wise.WiseUSDImporter('Assets:Wise', '0000'),
         ]

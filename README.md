@@ -43,6 +43,17 @@ GROUP BY month, account
 ORDER BY total, account DESC
 ```
 
+List of expenses of only selected accounts in a given month (a full date within the desired month must be given):
+
+```sql
+SELECT
+	account, sum(cost(position)) as total, month
+WHERE
+	account ~ "Expenses:(Groceries|Apparel|Beauty|Education|Entertainment|House-Supplies-Appliances|Social-Life|Utilities|Drinks|Animals|Food-Delivery|Subscriptions|Restaurants-and-Food-Out|Health|Culture|Electronics)" and year = YEAR(today()) and month = MONTH(2023-07-07)
+GROUP BY month, account
+ORDER BY total, account DESC
+```
+
 Monthly expenses report:
 
 ```sql

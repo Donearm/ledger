@@ -25,6 +25,7 @@ rules to analyze the transactions with (h)ledger and beancount.
 * `journals` = original (h)ledger files
 * `prices` = the dir where are saved commodities' prices
 * `rules` = rules for importing csv/pdf files into (h)ledger
+* `scripts` = helpful scripts
 
 # Beancount
 

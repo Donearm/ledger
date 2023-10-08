@@ -29,6 +29,10 @@ rules to analyze the transactions with (h)ledger and beancount.
 
 # Beancount
 
+An, untested, tool in Ruby to match CSV transactions to the right beancount 
+account is [reckon](https://github.com/cantino/reckon). It was born for ledger 
+only but beancount support was added in [7119459](https://github.com/cantino/reckon/commit/7119459237bebaf9f7bbd2f23a5675924509dcf3) commit.
+
 ## Reports
 
 A few useful commands for reporting to be used either with `bean-query` or with `fava`

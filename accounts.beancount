@@ -52,7 +52,6 @@
 2013-01-01 open Expenses:Household:Krakow
 2013-01-01 open Expenses:Household:Warsaw
 2013-01-01 open Expenses:Loan-Repayment
-2023-09-06 open Expenses:Mortgage
 2023-09-06 open Expenses:Mortgage:Interests
 2013-01-01 open Expenses:Other
 2013-01-01 open Expenses:Parents
@@ -102,7 +101,7 @@
 
 ; Liabilities
 2023-09-06 open Liabilities:House
-;2023-09-06 open Liabilities:Mortgage
+2023-09-06 open Liabilities:Mortgage
 
 ; Commodities
 2013-01-01 commodity ADA

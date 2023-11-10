@@ -29,6 +29,7 @@
 2013-01-01 open Assets:Upwork
 2013-01-01 open Assets:Wise
 2013-01-01 open Equity:RoundingError
+2023-01-01 open Expenses:Amnisstones
 2022-06-01 open Expenses:Animals
 2022-06-01 open Expenses:Animals:Food
 2013-01-01 open Expenses:Apparel
@@ -91,6 +92,7 @@
 2013-01-01 open Income:Paypal
 2013-01-01 open Income:Salary
 2013-01-01 open Income:Sales
+2013-01-01 open Income:Sales:Amnisstones
 2013-01-01 open Income:Taxes:Italy
 2013-01-01 open Income:Taxes:Poland
 2013-01-01 open Income:Upwork-Gig

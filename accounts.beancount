@@ -106,6 +106,7 @@
 ; Liabilities
 2023-09-06 open Liabilities:House
 2023-09-06 open Liabilities:Mortgage
+;2036-09-06 balance Liabilities:Mortgage -456000 PLN
 
 ; Commodities
 2013-01-01 commodity ADA

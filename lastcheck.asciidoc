@@ -2,7 +2,7 @@
 
 _unless otherwise specified, the date is always included_
 
-* Bank-Santander: 2024-01-16
+* Bank-Santander: 2024-03-15
 * Bank-Santander-Select: 2024-03-09
 * Bank-Millennium: 2024-03-04
 * Bank-T-Mobile: never

@@ -35,7 +35,7 @@ class WisePLNImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_1684353_PLN_[0-9-_]*\.csv', os.path.basename(f.name))
+        return re.match('statement_1684353_PLN_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -78,7 +78,7 @@ class WiseEURImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_2476408_EUR_[0-9-_]*\.csv', os.path.basename(f.name))
+        return re.match('statement_2476408_EUR_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -120,7 +120,7 @@ class WiseUSDImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_2100952_USD_[0-9-_]*\.csv', os.path.basename(f.name))
+        return re.match('statement_2100952_USD_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -162,7 +162,7 @@ class WiseIDRImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_39423616_IDR_[0-9-_]*\.csv', os.path.basename(f.name))
+        return re.match('statement_39423616_IDR_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []

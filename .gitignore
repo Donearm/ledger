@@ -3,3 +3,4 @@ csv/*.csv
 importers/paypal-beangulp.py
 journals/*.journal
 things_to_check.md
+__pycache__

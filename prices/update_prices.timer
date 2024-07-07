@@ -7,4 +7,4 @@ Persistent=true
 Unit=update_prices.service
 
 [Install]
-WantedBy=base.target
+WantedBy=basic.target

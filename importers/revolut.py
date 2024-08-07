@@ -36,7 +36,7 @@ class RevolutPLNImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en_[a-z0-9]*_PLN\.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_PLN.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -51,7 +51,7 @@ class RevolutPLNImporter(importer.ImporterProtocol):
                 #    print("This is absurd")
                 #    print(index)
                 #    print(row)
-                trans_date = parse(row['Started Date']).date()
+                trans_date = parse(row['Completed Date']).date()
                 trans_desc = row['Description']
                 trans_amt = row['Amount']
 
@@ -86,7 +86,7 @@ class RevolutEURImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en_[a-z0-9]*_EUR\.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_EUR.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -127,14 +127,14 @@ class RevolutUSDImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en_[a-z0-9]*_USD\.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_USD.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
 
         with open(f.name) as f:
             for index, row in enumerate(csv.DictReader(f)):
-                trans_date = parse(row['Started Date']).date()
+                trans_date = parse(row['Completed Date']).date()
                 trans_desc = row['Description']
                 trans_amt = row['Amount']
 
@@ -168,14 +168,14 @@ class RevolutTRYImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en_TRY_[a-z0-9]*\.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en_TRY_[a-z0-9]*.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
 
         with open(f.name) as f:
             for index, row in enumerate(csv.DictReader(f)):
-                trans_date = parse(row['Started Date']).date()
+                trans_date = parse(row['Complated Date']).date()
                 trans_desc = row['Description']
                 trans_amt = row['Amount']
 

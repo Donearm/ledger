@@ -3,7 +3,7 @@
 _unless otherwise specified, the date is always included_
 
 * Bank-Santander: 2024-07-01
-* Bank-Santander-Select: 2024-07-01
+* Bank-Santander-Select: 2024-08-08
 * Bank-Millennium: 2024-08-08
 * Bank-T-Mobile: never
 * Kraken: 2024-02-22

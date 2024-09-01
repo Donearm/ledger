@@ -9,7 +9,7 @@ _unless otherwise specified, the date is always included_
 * Kraken: 2024-02-22
 * N26: 2022-12-27
 * Paypal: 2023-01-31
-* Revolut: 2024-08-07
+* Revolut: 2024-09-01
 * Revolut-Sylwia: never
 * Wise: 2024-08-07
 

@@ -7,7 +7,7 @@ _unless otherwise specified, the date is always included_
 * Bank-Millennium: 2024-09-01
 * Bank-T-Mobile: never
 * Kraken: 2024-02-22
-* N26: 2022-12-27
+* N26: 2024-09-17
 * Paypal: 2023-01-31
 * Revolut: 2024-09-01
 * Revolut-Sylwia: never

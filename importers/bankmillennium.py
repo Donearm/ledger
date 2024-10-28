@@ -36,7 +36,7 @@ class MillenniumPLNImporter(importer.ImporterProtocol):
         """Regular expression to match the Bank Millennium csv export's filename"""
 
         # remember to add the currency code to the end of the exported file as Bank Millennium saves only the date and time, without any sign of the account name or currency
-        return re.match('Account_activity_[0-9_]*PLN\.csv', os.path.basename(f.name))
+        return re.match(r'Account_activity_[0-9_]*PLN\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -82,7 +82,7 @@ class MillenniumEURImporter(importer.ImporterProtocol):
         """Regular expression to match the Bank Millennium csv export's filename"""
 
         # remember to add the currency code to the end of the exported file as Bank Millennium saves only the date and time, without any sign of the account name or currency
-        return re.match('Account_activity_[0-9_]*EUR\.csv', os.path.basename(f.name))
+        return re.match(r'Account_activity_[0-9_]*EUR\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -127,7 +127,7 @@ class MillenniumUSDImporter(importer.ImporterProtocol):
         """Regular expression to match the Bank Millennium csv export's filename"""
 
         # remember to add the currency code to the end of the exported file as Bank Millennium saves only the date and time, without any sign of the account name or currency
-        return re.match('Account_activity_[0-9_]*USD\.csv', os.path.basename(f.name))
+        return re.match(r'Account_activity_[0-9_]*USD\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []

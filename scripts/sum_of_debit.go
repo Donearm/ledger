@@ -27,7 +27,6 @@ import (
 // Polska
 var millenniumCsv = regexp.MustCompile(`^(Downloads/)?Account_activity_*`)
 var santanderCsv = regexp.MustCompile(`^(Downloads/)?historia_*`)
-var santanderNewCsv	= regexp.MustCompile(`^(Downloads/)?nowa historia_*`)
 var santanderSelectCsv = regexp.MustCompile(`^(Downloads/)?history_*`)
 var wiseCsv = regexp.MustCompile(`^(Downloads/)?statement_*`)
 
@@ -66,12 +65,6 @@ func csvReader() {
 			total_debit += debit
 		} else if santanderCsv.MatchString(os.Args[1]) {
 			fmt.Println("This matched with santanderCsv")
-			recordStr := strings.Replace(record[5], ",", ".", -1)
-			recordStr = strings.Replace(recordStr, "-", "", -1)
-			debit, _ := strconv.ParseFloat(recordStr, 64)
-			total_debit += debit
-		} else if santanderNewCsv.MatchString(os.Args[1]) {
-			fmt.Println("This matched with santanderNewCsv")
 			recordStr := strings.Replace(record[5], ",", ".", -1)
 			recordStr = strings.Replace(recordStr, "-", "", -1)
 			debit, _ := strconv.ParseFloat(recordStr, 64)

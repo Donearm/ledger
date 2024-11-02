@@ -9,9 +9,9 @@ _unless otherwise specified, the date is always included_
 * Kraken: 2024-02-22
 * N26: 2024-09-17
 * Paypal: 2023-01-31
-* Revolut: 2024-10-01
+* Revolut: 2024-11-02
 * Revolut-Sylwia: never
-* Wise: 2024-10-01
+* Wise: 2024-11-02
 
 === URLs
 

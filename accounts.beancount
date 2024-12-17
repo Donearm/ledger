@@ -13,8 +13,11 @@
 2013-01-01 open Assets:Investments:Funds
 2013-01-01 open Assets:Kraken
 2013-01-01 open Assets:Kraken:ADA
+2013-01-01 open Assets:Kraken:BTC
 2013-01-01 open Assets:Kraken:DASH
+2013-01-01 open Assets:Kraken:FLR
 2013-01-01 open Assets:Kraken:REP
+2013-01-01 open Assets:Kraken:SGB
 2013-01-01 open Assets:Kraken:XMR
 2013-01-01 open Assets:Kraken:XRP
 2018-01-01 open Assets:N26
@@ -30,9 +33,9 @@
 2013-01-01 open Assets:Wise
 2013-01-01 open Equity:RoundingError
 2023-01-01 open Expenses:Amnisstones
-2022-06-01 open Expenses:Animals
 2022-06-01 open Expenses:Animals:Food
 2022-06-01 open Expenses:Animals:Health
+2022-06-01 open Expenses:Animals:Toys
 2013-01-01 open Expenses:Apparel
 2013-01-01 open Expenses:Bank-Commissions
 2013-01-01 open Expenses:Beauty

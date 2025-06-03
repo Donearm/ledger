@@ -2,7 +2,7 @@
 
 _unless otherwise specified, the date is always included_
 
-* Bank-Santander-Gianluca: 2025-05-04
+* Bank-Santander-Gianluca: 2025-06-02
 * Bank-Santander-Sylwia: 2025-05-04
 * Bank-Millennium: 2025-05-05
 * Bank-T-Mobile: never

@@ -93,17 +93,21 @@ class SantanderPolskaEURImporter(importer.ImporterProtocol):
         self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
 
     def identify(self, f):
+    #def identify(self, filepath: str):
         """Regular expression to match the Bank Santander Polska csv export's filename"""
 
         # Santander Polska doesn't make a difference between credit card's statements and saving account's ones in the name
         # Therefore, the format is identical
         # For EUR account, add '_EUR' at the end of filename to differentiate them from the PLN one
         return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(f.name))
+        #return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(filepath))
 
     def extract(self, f):
+    #def extract(self, filepath: str):
         entries = []
 
         with open(f.name) as f:
+        #with open(filepath) as f:
             #for index, row in enumerate(csv.DictReader(f)):
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
                 trans_date = parse(row['Date'], dayfirst=True).date()

@@ -3,7 +3,7 @@
 _unless otherwise specified, the date is always included_
 
 * Bank-Santander-Gianluca: 2025-08-05
-* Bank-Santander-Sylwia: 2025-07-12
+* Bank-Santander-Sylwia: 2025-08-23
 * Bank-Millennium: 2025-08-06
 * Bank-T-Mobile: never
 * Kraken: 2024-12-17

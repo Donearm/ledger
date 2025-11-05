@@ -21,14 +21,14 @@ class RevolutPLNImporter(Importer):
         self.lastfour = lastfour
         self.headers = ['Type', 'Product', 'Started Date', 'Completed Date', 'Description', 'Amount', 'Fee', 'Currency', 'State', 'Balance']
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match Revolut csv export's filename"""
-        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_PLN.csv', os.path.basename(file.name))
+        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_PLN.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name) as f:
+        with open(filepath) as f:
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
                 try:
                     trans_date = parse(row['Completed Date']).date()
@@ -62,14 +62,14 @@ class RevolutEURImporter(Importer):
         self.account = account
         self.lastfour = lastfour
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match Revolut csv export's filename"""
-        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_EUR.csv', os.path.basename(file.name))
+        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_EUR.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name, encoding='utf-8-sig') as f:
+        with open(filepath, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
                 try:
                     trans_date = parse(row['Completed Date']).date()
@@ -103,14 +103,14 @@ class RevolutUSDImporter(Importer):
         self.account = account
         self.lastfour = lastfour
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match Revolut csv export's filename"""
-        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_USD.csv', os.path.basename(file.name))
+        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_USD.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name) as f:
+        with open(filepath) as f:
             for index, row in enumerate(csv.DictReader(f)):
                 try:
                     trans_date = parse(row['Completed Date']).date()
@@ -137,45 +137,3 @@ class RevolutUSDImporter(Importer):
                 entries.append(txn)
 
         return entries
-
-
-class RevolutTRYImporter(Importer):
-    def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
-
-    def identify(self, file):
-        """Regular expression to match Revolut csv export's filename"""
-        return re.match('account-statement_[0-9-_]*_en_TRY_[a-z0-9]*.csv', os.path.basename(file.name))
-
-    def extract(self, file):
-        entries = []
-
-        with open(file.name) as f:
-            for index, row in enumerate(csv.DictReader(f)):
-                try:
-                    trans_date = parse(row['Completed Date']).date()
-                except ParserError:
-                    # Handle the parse error if necessary
-                    continue
-                trans_desc = row['Description']
-                trans_amt = row['Amount']
-
-                meta = Metadata(file.name, index)
-
-                txn = Transaction(
-                    meta=meta,
-                    date=trans_date,
-                    flag=Flag.OKAY,
-                    payee=trans_desc,
-                    narration="",
-                    tags=set(),
-                    links=set(),
-                    postings=[
-                        Posting(self.account, Amount(trans_amt, 'TRY'))
-                    ],
-                )
-                entries.append(txn)
-
-        return entries
-

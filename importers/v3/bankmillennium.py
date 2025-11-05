@@ -19,14 +19,14 @@ class MillenniumPLNImporter(Importer):
         self.account = account
         self.lastfour = lastfour
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match the Bank Millennium csv export's filename"""
-        return re.match(r'Account_activity_[0-9_]*PLN\.csv', os.path.basename(file.name))
+        return re.match(r'Account_activity_[0-9_]*PLN\.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name) as f:
+        with open(filepath) as f:
             for index, row in enumerate(csv.DictReader(f)):
                 trans_date = datetime.strptime(row['Transaction date'], '%Y-%m-%d').date()
                 trans_desc = row['Transaction Type'] + ' ' + row['Description']
@@ -56,14 +56,14 @@ class MillenniumEURImporter(Importer):
         self.account = account
         self.lastfour = lastfour
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match the Bank Millennium csv export's filename"""
-        return re.match(r'Account_activity_[0-9_]*EUR\.csv', os.path.basename(file.name))
+        return re.match(r'Account_activity_[0-9_]*EUR\.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name, encoding='utf-8-sig') as f:
+        with open(filepath, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
                 trans_date = datetime.strptime(row['Transaction date'], '%Y-%m-%d').date()
                 trans_desc = row['Transaction Type'] + ' ' + row['Description']
@@ -93,14 +93,14 @@ class MillenniumUSDImporter(Importer):
         self.account = account
         self.lastfour = lastfour
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match the Bank Millennium csv export's filename"""
-        return re.match(r'Account_activity_[0-9_]*USD\.csv', os.path.basename(file.name))
+        return re.match(r'Account_activity_[0-9_]*USD\.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name) as f:
+        with open(filepath) as f:
             for index, row in enumerate(csv.DictReader(f)):
                 trans_date = datetime.strptime(row['Transaction date'], '%Y-%m-%d').date()
                 trans_desc = row['Transaction Type'] + ' ' + row['Description']

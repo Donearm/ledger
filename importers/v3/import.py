@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2024, Gianluca Fiore
+# Copyright (c) 2025, Gianluca Fiore
 #
 ###############################################################################
 
@@ -18,6 +18,9 @@ __status__ = ""
 
 # Import bank's importers
 from bankmillennium import MillenniumPLNImporter, MillenniumEURImporter, MillenniumUSDImporter
+from revolut import RevolutPLNImporter, RevolutEURImporter, RevolutUSDImporter
+from santander import SantanderPolskaPLNImporter, SantanderPolskaEURImporter
+from wise import WisePLNImporter, WiseEURImporter, WiseUSDImporter
 from beangulp import Ingest
 import sys
 

@@ -14,20 +14,20 @@ import csv
 import os
 import re
 
-class SantanderPolskaImporter(Importer):
+class SantanderPolskaPLNImporter(Importer):
     def __init__(self, account, lastfour):
         self.account = account
         self.lastfour = lastfour
         self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match the Bank Santander Polska csv export's filename"""
-        return re.match('[nowa\s]?histor[iy]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*(_PLN)?\.csv', os.path.basename(file.name))
+        return re.match('[nowa\s]?histor[iy]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*(_PLN)?\.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name) as f:
+        with open(filepath) as f:
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
                 trans_date = datetime.strptime(row['Date'], '%Y-%m-%d').date()
                 trans_desc = row['Description']
@@ -58,14 +58,14 @@ class SantanderPolskaEURImporter(Importer):
         self.lastfour = lastfour
         self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
 
-    def identify(self, file):
+    def identify(self, filepath: str):
         """Regular expression to match the Bank Santander Polska csv export's filename"""
-        return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(file.name))
+        return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(filepath))
 
-    def extract(self, file):
+    def extract(self, filepath: str):
         entries = []
 
-        with open(file.name) as f:
+        with open(filepath) as f:
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
                 trans_date = datetime.strptime(row['Date'], '%Y-%m-%d').date()
                 trans_desc = row['Description']

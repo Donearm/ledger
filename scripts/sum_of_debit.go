@@ -96,17 +96,17 @@ func csvReader(path string) {
 			continue
 		}
 
+		// Detect if the original field was negative (leading '-') before normalization
+		originalWasNegative := strings.HasPrefix(field, "-")
 		// Normalize number: change comma to dot
 		field = strings.ReplaceAll(field, ",", ".")
 		// Remove thousands separators (if any) - example: "1 234.56" or "1'234.56"
 		field = strings.ReplaceAll(field, " ", "")
 		field = strings.ReplaceAll(field, "'", "")
 
-		// Original logic removed '-' to make negative numbers positive (sum of magnitudes).
-		// We'll try to preserve that behavior: remove leading '-' then parse.
-		neg := false
+		// if the field had a leading '-', remove it so we can parse the 
+		// magnitude
 		if strings.HasPrefix(field, "-") {
-			neg = true
 			field = strings.TrimPrefix(field, "-")
 		}
 
@@ -118,12 +118,12 @@ func csvReader(path string) {
 		}
 		parsedValue = parsed
 
-		// Add to total. Preserving original behavior: treat negative values as positive magnitude.
-		// If you prefer to only sum values that were negative in CSV (true debits), use:
-		// if neg { totalDebit += parsedValue }
-		totalDebit += parsedValue
+		// Only add values that were negative in the original CSV (true debts)
+		if originalWasNegative {
+			totalDebit += parsedValue
+		}
 
-		fmt.Printf("Row %d: parsed=%f (raw %q) total=%f\n", row, parsedValue, record[colIdx], totalDebit)
+		fmt.Printf("Row %d: parsed=%f (raw %q) added=%t total=%f\n", row, parsedValue, record[colIdx], originalWasNegative, totalDebit)
 	}
 
 	fmt.Printf("Total debit is %f\n", totalDebit)

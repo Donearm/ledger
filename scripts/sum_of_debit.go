@@ -15,11 +15,12 @@ package main
 
 import (
 	"encoding/csv"
-	"strconv"
 	"fmt"
-	"os"
 	"io"
+	"os"
+	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -30,79 +31,108 @@ var santanderCsv = regexp.MustCompile(`^(Downloads/)?historia_*`)
 var santanderSelectCsv = regexp.MustCompile(`^(Downloads/)?history_*`)
 var wiseCsv = regexp.MustCompile(`^(Downloads/)?statement_*`)
 
-func csvReader() {
-	fmt.Println(os.Args[1])
-	csvFile, err := os.Open(os.Args[1])
+func csvReader(path string) {
+	fmt.Println("Reading:", path)
+
+	csvFile, err := os.Open(path)
 	if err != nil {
-		fmt.Println("An error encountered while opening file", err)
+		fmt.Println("Error opening file:", err)
 		return
 	}
+	defer func() {
+		if err := csvFile.Close(); err != nil {
+			fmt.Println("Error closing file:", err)
+		}
+	}()
 
 	reader := csv.NewReader(csvFile)
-	reader.LazyQuotes = true // Bank Millennium csv needs this
+	reader.LazyQuotes = true
+	reader.FieldsPerRecord = -1 // allow variable number of fields
 
-	var total_debit float64
-	var debit float64
-	for i := 2 ;; i = i + 1 {
+	var totalDebit float64
+	var parsedValue float64
+
+	// choose column index based on filename (use base name for matching)
+	base := filepath.Base(path)
+	colIdx := 7 // default
+	switch {
+	case millenniumCsv.MatchString(base):
+		colIdx = 7
+	case santanderCsv.MatchString(base):
+		colIdx = 5
+	case santanderSelectCsv.MatchString(base):
+		colIdx = 5
+	case wiseCsv.MatchString(base):
+		colIdx = 2
+	default:
+		colIdx = 7
+	}
+
+	row := 0
+	for {
 		record, err := reader.Read()
 		if err == io.EOF {
-			break // reached end of file
-		} else if err != nil {
-			fmt.Println("An error occurred while reading the file", err)
+			break
+		}
+		if err != nil {
+			fmt.Println("Error reading CSV:", err)
 			return
 		}
+		row++
 
-		// A convoluted way to remove - in front of negative numbers to make 
-		// them positive, and to change the comma into points
-		// This was born out of the impossibility to chain math.Abs to 
-		// strconv.ParseFloat and strconv.ParseInt 
-		// Impossibility here meaning "I can't be bothered to understand how 
-		// and prefer an ugly hack for the moment"
-		if millenniumCsv.MatchString(os.Args[1]) {
-			recordStr := strings.Replace(record[7], ",", ".", -1)
-			recordStr = strings.Replace(recordStr, "-", "", -1)
-			debit, _ := strconv.ParseFloat(recordStr, 64)
-			total_debit += debit
-		} else if santanderCsv.MatchString(os.Args[1]) {
-			fmt.Println("This matched with santanderCsv")
-			recordStr := strings.Replace(record[5], ",", ".", -1)
-			recordStr = strings.Replace(recordStr, "-", "", -1)
-			debit, _ := strconv.ParseFloat(recordStr, 64)
-			total_debit += debit
-		} else if santanderSelectCsv.MatchString(os.Args[1]) {
-			fmt.Println("This matched with santanderSelectCsv")
-			recordStr := strings.Replace(record[5], ",", ".", -1)
-			recordStr = strings.Replace(recordStr, "-", "", -1)
-			debit, _ := strconv.ParseFloat(recordStr, 64)
-			total_debit += debit
-		} else if wiseCsv.MatchString(os.Args[1]) {
-			fmt.Println("This matched with wiseCsv")
-			recordStr := strings.Replace(record[2], ",", ".", -1)
-			recordStr = strings.Replace(recordStr, "-", "", -1)
-			debit, _ := strconv.ParseFloat(recordStr, 64)
-			total_debit += debit
-		} else {
-			recordStr := strings.Replace(record[7], ",", ".", -1)
-			recordStr = strings.Replace(recordStr, "-", "", -1)
-			debit, _ := strconv.ParseFloat(recordStr, 64)
-			total_debit += debit
+		// Skip first row (header) to match previous behavior (the original started i := 2)
+		if row == 1 {
+			continue
 		}
 
-		//debit, _ := strconv.ParseFloat(record[7], 8)
-		//total_debit += debit
+		if colIdx >= len(record) {
+			fmt.Printf("Row %d: not enough columns (need index %d, got %d) -> skipping\n", row, colIdx, len(record))
+			continue
+		}
 
-		fmt.Printf("Row %d : %v %f \n", i, record, debit)
+		field := strings.TrimSpace(record[colIdx])
+		if field == "" {
+			// empty cell -> skip
+			continue
+		}
+
+		// Normalize number: change comma to dot
+		field = strings.ReplaceAll(field, ",", ".")
+		// Remove thousands separators (if any) - example: "1 234.56" or "1'234.56"
+		field = strings.ReplaceAll(field, " ", "")
+		field = strings.ReplaceAll(field, "'", "")
+
+		// Original logic removed '-' to make negative numbers positive (sum of magnitudes).
+		// We'll try to preserve that behavior: remove leading '-' then parse.
+		neg := false
+		if strings.HasPrefix(field, "-") {
+			neg = true
+			field = strings.TrimPrefix(field, "-")
+		}
+
+		// Parse float
+		parsed, perr := strconv.ParseFloat(field, 64)
+		if perr != nil {
+			fmt.Printf("Row %d: cannot parse value %q: %v -> skipping\n", row, record[colIdx], perr)
+			continue
+		}
+		parsedValue = parsed
+
+		// Add to total. Preserving original behavior: treat negative values as positive magnitude.
+		// If you prefer to only sum values that were negative in CSV (true debits), use:
+		// if neg { totalDebit += parsedValue }
+		totalDebit += parsedValue
+
+		fmt.Printf("Row %d: parsed=%f (raw %q) total=%f\n", row, parsedValue, record[colIdx], totalDebit)
 	}
-	fmt.Println("Total debit is ", total_debit)
 
-	err = csvFile.Close()
-	if err != nil {
-		fmt.Println("An error encountered while closing file", err)
-		return
-	}
-
+	fmt.Printf("Total debit is %f\n", totalDebit)
 }
 
 func main() {
-	csvReader()
+	if len(os.Args) < 2 {
+		fmt.Printf("Usage: %s <csv-file-path>\n", filepath.Base(os.Args[0]))
+		os.Exit(2)
+	}
+	csvReader(os.Args[1])
 }

@@ -43,6 +43,7 @@
 2025-06-01 open Expenses:Car-Instalments
 2013-01-01 open Expenses:Card:Cartaimpronta
 2013-01-01 open Expenses:Culture
+2013-01-01 open Expenses:Depreciation
 2013-01-01 open Expenses:Drinks
 2013-01-01 open Expenses:Drogeria
 2013-01-01 open Expenses:Education
@@ -88,9 +89,13 @@
 2013-01-01 open Expenses:Travel
 2013-01-01 open Expenses:Travel:Accommodations
 2013-01-01 open Expenses:Utilities
+2013-01-01 open Expenses:Utilities:Zglobice
+2025-12-01 open Expenses:Utilities:Kalwaryjska:Electricity
+2025-12-01 open Expenses:Utilities:Kalwaryjska:Water
 2013-01-01 open Income:Advertising:Adsense
 2013-01-01 open Income:Advertising:Amazon
 2013-01-01 open Income:Advertising:Ezoic
+2013-01-01 open Income:Appreciation
 2013-01-01 open Income:Bonus
 2013-01-01 open Income:Freelancing
 2013-01-01 open Income:Interests

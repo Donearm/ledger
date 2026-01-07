@@ -30,6 +30,7 @@ var millenniumCsv = regexp.MustCompile(`^(Downloads/)?Account_activity_*`)
 var santanderCsv = regexp.MustCompile(`^(Downloads/)?historia_*`)
 var santanderSelectCsv = regexp.MustCompile(`^(Downloads/)?history_*`)
 var wiseCsv = regexp.MustCompile(`^(Downloads/)?statement_*`)
+var revolutCsv = regexp.MustCompile(`^(Downloads/)?account-statement_*`)
 
 func csvReader(path string) {
 	fmt.Println("Reading:", path)
@@ -64,6 +65,8 @@ func csvReader(path string) {
 		colIdx = 5
 	case wiseCsv.MatchString(base):
 		colIdx = 2
+	case revolutCsv.MatchString(base):
+		colIdx = 5
 	default:
 		colIdx = 7
 	}

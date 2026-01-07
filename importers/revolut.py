@@ -36,12 +36,12 @@ class RevolutPLNImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_PLN.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en-[a-z0-9]*_PLN.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
 
-        with open(f.name) as f:
+        with open(f.name, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
                 #try:
                 #    trans_date = parse(row['Completed Date']).date()
@@ -86,7 +86,7 @@ class RevolutEURImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_EUR.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en_[a-z0-9]*_EUR.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -127,12 +127,12 @@ class RevolutUSDImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Revolut csv export's filename"""
 
-        return re.match('account-statement_[0-9-_]*_en-us_[a-z0-9]*_USD.csv', os.path.basename(f.name))
+        return re.match('account-statement_[0-9-_]*_en_[a-z0-9]*_USD.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
 
-        with open(f.name) as f:
+        with open(f.name, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
                 trans_date = parse(row['Completed Date']).date()
                 trans_desc = row['Description']
@@ -173,9 +173,9 @@ class RevolutTRYImporter(importer.ImporterProtocol):
     def extract(self, f):
         entries = []
 
-        with open(f.name) as f:
+        with open(f.name, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
-                trans_date = parse(row['Complated Date']).date()
+                trans_date = parse(row['Completed Date']).date()
                 trans_desc = row['Description']
                 trans_amt = row['Amount']
 

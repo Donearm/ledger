@@ -11,7 +11,7 @@ _unless otherwise specified, the date is always included_
 * Paypal: 2023-01-31
 * Revolut: 2026-04-26
 * Revolut-Sylwia: never
-* Wise: 2026-03-08
+* Wise: 2026-04-28
 
 === URLs
 

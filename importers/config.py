@@ -31,11 +31,13 @@ import revolut
 import wise
 
 CONFIG = [
-        #bankmillennium.MillenniumPLNImporter('Assets:Bank-Millennium', '0000'),
-        #bankmillennium.MillenniumEURImporter('Assets:Bank-Millennium', '0000'),
-        #bankmillennium.MillenniumUSDImporter('Assets:Bank-Millennium', '0000'),
-        santanderpolska.SantanderPolskaImporter('Assets:Bank-Santander', '0000'),
-        santanderpolska.SantanderPolskaEURImporter('Assets:Bank-Santander', '0000'),
+        bankmillennium.MillenniumPLNImporter('Assets:Bank-Millennium', '0000'),
+        bankmillennium.MillenniumEURImporter('Assets:Bank-Millennium', '0000'),
+        bankmillennium.MillenniumUSDImporter('Assets:Bank-Millennium', '0000'),
+        #santanderpolska.SantanderPolskaImporter('Assets:Bank-Santander-Gianluca', '0000'),
+        #santanderpolska.SantanderPolskaEURImporter('Assets:Bank-Santander-Gianluca', '0000'),
+        #santanderpolska.SantanderPolskaImporter('Assets:Bank-Santander-Sylwia', '0000'),
+        #santanderpolska.SantanderPolskaEURImporter('Assets:Bank-Santander-Sylwia', '0000'),
         #kraken.KrakenLedgerImporter('Assets:Kraken', '0000'),
         #kraken.KrakenTradeImporter('Assets:Kraken', '0000'),
         #n26.N26Importer('Assets:N26', '0000'),

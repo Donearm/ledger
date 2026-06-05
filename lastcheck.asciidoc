@@ -4,7 +4,7 @@ _unless otherwise specified, the date is always included_
 
 * Bank-Erste-Gianluca: 2026-06-04
 * Bank-Erste-Sylwia: 2026-03-23
-* Bank-Millennium: 2026-04-28
+* Bank-Millennium: 2026-06-04
 * Bank-T-Mobile: never
 * Kraken: 2024-12-17
 * N26: 2025-10-17

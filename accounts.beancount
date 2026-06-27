@@ -78,8 +78,6 @@
 2013-01-01 open Expenses:Subscriptions:Spotify
 2026-02-01 open Expenses:Subscriptions:T-Mobile
 2013-01-01 open Expenses:Subscriptions:Upc
-2013-01-01 open Expenses:Taxes
-2013-01-01 open Expenses:Taxes:Italy
 2023-01-01 open Expenses:Transportation:Car-Expenses
 2023-01-01 open Expenses:Transportation:Car-Fuel
 2013-01-01 open Expenses:Transportation:Car-Rental
@@ -123,9 +121,10 @@
 2021-02-15 close Expenses:Card:Cartaimpronta
 
 ; Liabilities
+2013-01-01 open Liabilities:Taxes:Italy
+2016-01-01 open Liabilities:Taxes:Poland
 2023-09-06 open Liabilities:House
 2023-09-06 open Liabilities:Mortgage
-2016-01-01 open Liabilities:Taxes:Poland
 ;2036-09-06 balance Liabilities:Mortgage -456000 PLN
 
 ; Commodities

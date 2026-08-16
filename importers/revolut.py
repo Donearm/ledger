@@ -33,7 +33,7 @@ LOG = logging.getLogger(__name__)
 
 def _make_identify_regex(currency):
     # Accept both _en_ and _en-us_ (and similar), be case-insensitive for safety
-    return re.compile(r'^account-statement_[0-9\-_]*_en(?:-us)?_[a-z0-9]*_{}\.csv$'.format(re.escape(currency)),
+    return re.compile(r'^account-statement_[0-9\-_]*_en(?:-gb)?_[a-z0-9]*_{}\.csv$'.format(re.escape(currency)),
                       flags=re.IGNORECASE)
 
 

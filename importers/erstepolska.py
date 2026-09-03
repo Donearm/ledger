@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022, Gianluca Fiore
+# Copyright (c) 2022-2026, Gianluca Fiore
 #
 ###############################################################################
 
@@ -27,16 +27,16 @@ import csv
 import os
 import re
 
-class SantanderPolskaImporter(importer.ImporterProtocol):
+class ErstePolskaImporter(importer.ImporterProtocol):
     def __init__(self, account, lastfour):
         self.account = account
         self.lastfour = lastfour
         self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
 
     def identify(self, f):
-        """Regular expression to match the Bank Santander Polska csv export's filename"""
+        """Regular expression to match the Bank Erste Polska csv export's filename"""
 
-        # Santander Polska doesn't make a difference between credit card's statements and saving account's ones in the name
+        # Erste Polska doesn't make a difference between credit card's statements and saving account's ones in the name
         # Therefore, the format is identical
         return re.match('[nowa\s]?histor[iy]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*(_PLN)?\.csv', os.path.basename(f.name))
 
@@ -48,7 +48,7 @@ class SantanderPolskaImporter(importer.ImporterProtocol):
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
                 trans_date = parse(row['Date'], dayfirst=True).date()
                 trans_desc = row['Description']
-                # Santander Polska use periods to separate thousands and commas to separate integer with decimal numbers
+                # Erste Polska use periods to separate thousands and commas to separate integer with decimal numbers
                 # As beancount's D function doesn't support this yet (https://github.com/beancount/beancount/issues/204)
                 # it is simpler to just replace the commas with periods in the amount's column
                 trans_amt = row['Amount'].replace(",", ".")
@@ -86,7 +86,7 @@ class SantanderPolskaImporter(importer.ImporterProtocol):
 
         return entries
 
-class SantanderPolskaEURImporter(importer.ImporterProtocol):
+class ErstePolskaEURImporter(importer.ImporterProtocol):
     def __init__(self, account, lastfour):
         self.account = account
         self.lastfour = lastfour
@@ -94,9 +94,9 @@ class SantanderPolskaEURImporter(importer.ImporterProtocol):
 
     def identify(self, f):
     #def identify(self, filepath: str):
-        """Regular expression to match the Bank Santander Polska csv export's filename"""
+        """Regular expression to match the Bank Erste Polska csv export's filename"""
 
-        # Santander Polska doesn't make a difference between credit card's statements and saving account's ones in the name
+        # Erste Polska doesn't make a difference between credit card's statements and saving account's ones in the name
         # Therefore, the format is identical
         # For EUR account, add '_EUR' at the end of filename to differentiate them from the PLN one
         return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(f.name))
@@ -112,7 +112,7 @@ class SantanderPolskaEURImporter(importer.ImporterProtocol):
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
                 trans_date = parse(row['Date'], dayfirst=True).date()
                 trans_desc = row['Description']
-                # Santander Polska use periods to separate thousands and commas to separate integer with decimal numbers
+                # Erste Polska use periods to separate thousands and commas to separate integer with decimal numbers
                 # As beancount's D function doesn't support this yet (https://github.com/beancount/beancount/issues/204)
                 # it is simpler to just replace the commas with periods in the amount's column
                 trans_amt = row['Amount'].replace(",", ".")

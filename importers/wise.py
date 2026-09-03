@@ -35,7 +35,7 @@ class WisePLNImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_1684353_PLN_[0-9-_]*\\.csv', os.path.basename(f.name))
+        return re.match('transaction-history_PLN_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -78,7 +78,7 @@ class WiseEURImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_2476408_EUR_[0-9-_]*\\.csv', os.path.basename(f.name))
+        return re.match('transaction-history_EUR_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -86,9 +86,9 @@ class WiseEURImporter(importer.ImporterProtocol):
         with open(f.name, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
                 # dayfirst option must be present as the date format of Wise is %d-%m-%Y
-                trans_date = parse(row['Date'], dayfirst=True).date()
-                trans_desc = row['Description']
-                trans_amt = row['Amount']
+                trans_date = parse(row['Created on'], dayfirst=True).date()
+                trans_desc = row['Target name']
+                trans_amt = row['Target amount (after fees)']
 
                 meta = data.new_metadata(f.name, index)
 
@@ -120,7 +120,7 @@ class WiseUSDImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_2100952_USD_[0-9-_]*\\.csv', os.path.basename(f.name))
+        return re.match('transaction-history_USD_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -162,7 +162,7 @@ class WiseIDRImporter(importer.ImporterProtocol):
     def identify(self, f):
         """Regular expression to match Wise csv export's filename"""
 
-        return re.match('statement_39423616_IDR_[0-9-_]*\\.csv', os.path.basename(f.name))
+        return re.match('transaction-history_IDR_[0-9-_]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []

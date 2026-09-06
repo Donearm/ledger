@@ -11,7 +11,7 @@ __copyright__ = ""
 __credits__ = ""
 __license__ = ""
 __version__ = ""
-__mantainer__ = ""
+__maintainer__ = ""
 __date__ = ""
 __email__ = ""
 __status__ = ""
@@ -38,15 +38,32 @@ class PekaoImporter(importer.ImporterProtocol):
 
         return re.match('Lista_operacji_[0-9]*_[0-9]*\\.csv', os.path.basename(f.name))
 
+    @staticmethod
+    def _clean(text):
+        """Locale-normalise a Polish-formatted decimal string for beancount to understand"""
+        if text is None:
+            return None
+        return (text.replace('\xa0', '')
+                    .replace(' ', '')
+                    .replace('+', '')
+                    .replace(',', '.'))
+
     def extract(self, f):
         entries = []
 
         with open(f.name) as f:
             #for index, row in enumerate(csv.DictReader(f)):
-            for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
+            # Here delimiter is necessary because Pekao uses ; instead of , as separator...
+            for index, row in enumerate(csv.DictReader(f, delimiter=';', fieldnames=self.headers)):
+
+                if index == 0:
+                    # skip the embedded header line
+                    continue
                 trans_date = parse(row['Data waluty'], dayfirst=True).date()
-                trans_desc = row['Tytułem']
+                trans_desc = row['Tytułem'] or row['Nadawca / Odbiorca'] or ''
                 trans_amt = row['Kwota operacji']
+                if trans_amt is None:
+                    continue
 
                 #trans_date = parse(row[1]).date()
                 #trans_desc = row[2]
@@ -65,15 +82,15 @@ class PekaoImporter(importer.ImporterProtocol):
                         meta = meta,
                         date = trans_date,
                         flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
+                        payee = trans_desc.strip(),
+                        narration = row['Typ operacji'] or "",
                         tags = set(),
                         links = set(),
                         postings = [],
                         )
 
                 txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'PLN'),
+                        data.Posting(self.account, amount.Amount(D(self._clean(trans_amt)), 'PLN'),
                             None, None, None, None)
                         )
                 

@@ -24,13 +24,20 @@ import (
 	"strings"
 )
 
-// Regexp to match the statement filenames of Bank Millennium and Bank Santander 
-// Polska
-var millenniumCsv = regexp.MustCompile(`^(Downloads/)?Account_activity_*`)
+// Regexp to match the statement filenames
+// Millennium is commented out because I closed it
+//var millenniumCsv = regexp.MustCompile(`^(Downloads/)?Account_activity_*`)
 var santanderCsv = regexp.MustCompile(`^(Downloads/)?historia_*`)
 var santanderSelectCsv = regexp.MustCompile(`^(Downloads/)?history_*`)
+var pekaoCsv = regexp.MustCompile(`^(Downloads/)?Lista_operacji_*`)
 var wiseCsv = regexp.MustCompile(`^(Downloads/)?statement_*`)
 var revolutCsv = regexp.MustCompile(`^(Downloads/)?account-statement_*`)
+
+// create a new struct to handle different separators depending on the statement
+type csvFormat struct {
+	comma rune
+	colIdx int
+}
 
 func csvReader(path string) {
 	fmt.Println("Reading:", path)
@@ -53,23 +60,27 @@ func csvReader(path string) {
 	var totalDebit float64
 	var parsedValue float64
 
+	cfg := csvFormat{comma: ',', colIdx: 7} // default
+
 	// choose column index based on filename (use base name for matching)
 	base := filepath.Base(path)
-	colIdx := 7 // default
 	switch {
-	case millenniumCsv.MatchString(base):
-		colIdx = 7
+	//case millenniumCsv.MatchString(base):
+	//  cfg = csvFormat{',', 7}
 	case santanderCsv.MatchString(base):
-		colIdx = 5
+		cfg = csvFormat{',', 5}
 	case santanderSelectCsv.MatchString(base):
-		colIdx = 5
+		cfg = csvFormat{',', 5}
 	case wiseCsv.MatchString(base):
-		colIdx = 2
+		cfg = csvFormat{',', 2}
 	case revolutCsv.MatchString(base):
-		colIdx = 5
-	default:
-		colIdx = 7
+		cfg = csvFormat{',', 5}
+	case pekaoCsv.MatchString(base):
+		cfg = csvFormat{',', 7}
 	}
+
+	reader.Comma = cfg.comma
+	colIdx := cfg.colIdx
 
 	row := 0
 	for {

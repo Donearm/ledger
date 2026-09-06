@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022-2025, Gianluca Fiore
+# Copyright (c) 2022-2026, Gianluca Fiore
 #
 ###############################################################################
 
@@ -14,14 +14,14 @@ import csv
 import os
 import re
 
-class SantanderPolskaImporter(Importer):
+class ErstePolskaImporter(Importer):
     def __init__(self, account, lastfour):
         self.account = account
         self.lastfour = lastfour
         self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
 
     def identify(self, file):
-        """Regular expression to match the Bank Santander Polska csv export's filename"""
+        """Regular expression to match the Bank Erste Polska csv export's filename"""
         return re.match('[nowa\s]?histor[iy]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*(_PLN)?\.csv', os.path.basename(file.name))
 
     def extract(self, file):
@@ -52,14 +52,14 @@ class SantanderPolskaImporter(Importer):
         return entries
 
 
-class SantanderPolskaEURImporter(Importer):
+class ErstePolskaEURImporter(Importer):
     def __init__(self, account, lastfour):
         self.account = account
         self.lastfour = lastfour
         self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
 
     def identify(self, file):
-        """Regular expression to match the Bank Santander Polska csv export's filename"""
+        """Regular expression to match the Bank Erste Polska csv export's filename"""
         return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(file.name))
 
     def extract(self, file):

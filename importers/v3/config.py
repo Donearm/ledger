@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###############################################################################
+#
+# Copyright (c) 2022-2026, Gianluca Fiore
+#
+###############################################################################
+
+import os
+import sys
+
+# beancount doesn't run from this directory
+sys.path.append(os.path.dirname(__file__))
+
+import beangulp
+
+import bankmillennium
+import erstepolska
+import kraken
+import n26
+import paypal
+import pekao
+import revolut
+import wise
+
+CONFIG = [
+        #bankmillennium.MillenniumPLNImporter('Assets:Bank-Millennium', '0000'),
+        #bankmillennium.MillenniumEURImporter('Assets:Bank-Millennium', '0000'),
+        #bankmillennium.MillenniumUSDImporter('Assets:Bank-Millennium', '0000'),
+        #erstepolska.ErstePolskaImporter('Assets:Bank-Erste-Gianluca', '0000'),
+        #erstepolska.ErstePolskaEURImporter('Assets:Bank-Erste-Gianluca', '0000'),
+        #erstepolska.ErstePolskaImporter('Assets:Bank-Erste-Sylwia', '0000'),
+        #erstepolska.ErstePolskaEURImporter('Assets:Bank-Erste-Sylwia', '0000'),
+        #kraken.KrakenLedgerImporter('Assets:Kraken', '0000'),
+        #kraken.KrakenTradeImporter('Assets:Kraken', '0000'),
+        #n26.N26Importer('Assets:N26', '0000'),
+        #paypal.PaypalImporter('Assets:Paypal', '0000'),
+        pekao.PekaoImporter('Assets:Bank-Pekao-Gianluca', '0000'),
+        #revolut.RevolutUSDImporter('Assets:Revolut', '0000'),
+        #revolut.RevolutPLNImporter('Assets:Revolut', '0000'),
+        #revolut.RevolutEURImporter('Assets:Revolut', '0000'),
+        #wise.WiseEURImporter('Assets:Wise', '0000'),
+        #wise.WisePLNImporter('Assets:Wise', '0000'),
+        #wise.WiseUSDImporter('Assets:Wise', '0000'),
+        ]
+
+HOOKS = []
+
+if __name__ == '__main__':
+    ingest = beangulp.Ingest(CONFIG, HOOKS)
+    ingest()

@@ -83,7 +83,7 @@ class PekaoImporter(importer.ImporterProtocol):
                         date = trans_date,
                         flag = flags.FLAG_OKAY,
                         payee = trans_desc.strip(),
-                        narration = row['Typ operacji'] or "",
+                        narration = row['Nadawca / Odbiorca'] + row['Typ operacji'] or "",
                         tags = set(),
                         links = set(),
                         postings = [],

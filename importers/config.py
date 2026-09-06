@@ -43,7 +43,7 @@ CONFIG = [
         #kraken.KrakenTradeImporter('Assets:Kraken', '0000'),
         #n26.N26Importer('Assets:N26', '0000'),
         #paypal.PaypalImporter('Assets:Paypal', '0000'),
-        pekao.PekaoImporter('Assets:Pekao', '0000'),
+        pekao.PekaoImporter('Assets:Bank-Pekao-Gianluca', '0000'),
         #revolut.RevolutUSDImporter('Assets:Revolut', '0000'),
         #revolut.RevolutPLNImporter('Assets:Revolut', '0000'),
         #revolut.RevolutEURImporter('Assets:Revolut', '0000'),

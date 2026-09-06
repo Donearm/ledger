@@ -31,14 +31,12 @@ class PekaoImporter(importer.ImporterProtocol):
     def __init__(self, account, lastfour):
         self.account = account
         self.lastfour = lastfour
-        self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
+        self.headers = ['Data księgowania', 'Data waluty', 'Nadawca / Odbiorca', 'Adres nadawcy / odbiorcy', 'Rachunek źródłowy', 'Rachunek docelowy', 'Tytułem', 'Kwota operacji', 'Waluta', 'Numer referencyjny','Typ operacji', 'Kategoria']
 
     def identify(self, f):
         """Regular expression to match the Bank Pekao csv export's filename"""
 
-        # Pekao doesn't make a difference between credit card's statements and saving account's ones in the name
-        # Therefore, the format is identical
-        return re.match('[nowa\s]?histor[iy]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*(_PLN)?\.csv', os.path.basename(f.name))
+        return re.match('Lista_operacji_[0-9]*_[0-9]*\\.csv', os.path.basename(f.name))
 
     def extract(self, f):
         entries = []
@@ -46,12 +44,9 @@ class PekaoImporter(importer.ImporterProtocol):
         with open(f.name) as f:
             #for index, row in enumerate(csv.DictReader(f)):
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
-                trans_date = parse(row['Date'], dayfirst=True).date()
-                trans_desc = row['Description']
-                # Pekao use periods to separate thousands and commas to separate integer with decimal numbers
-                # As beancount's D function doesn't support this yet (https://github.com/beancount/beancount/issues/204)
-                # it is simpler to just replace the commas with periods in the amount's column
-                trans_amt = row['Amount'].replace(",", ".")
+                trans_date = parse(row['Data waluty'], dayfirst=True).date()
+                trans_desc = row['Tytułem']
+                trans_amt = row['Kwota operacji']
 
                 #trans_date = parse(row[1]).date()
                 #trans_desc = row[2]
@@ -86,66 +81,3 @@ class PekaoImporter(importer.ImporterProtocol):
 
         return entries
 
-class PekaoEURImporter(importer.ImporterProtocol):
-    def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
-        self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
-
-    def identify(self, f):
-    #def identify(self, filepath: str):
-        """Regular expression to match the Bank Pekao csv export's filename"""
-
-        # Pekao doesn't make a difference between credit card's statements and saving account's ones in the name
-        # Therefore, the format is identical
-        # For EUR account, add '_EUR' at the end of filename to differentiate them from the PLN one
-        return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(f.name))
-        #return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(filepath))
-
-    def extract(self, f):
-    #def extract(self, filepath: str):
-        entries = []
-
-        with open(f.name) as f:
-        #with open(filepath) as f:
-            #for index, row in enumerate(csv.DictReader(f)):
-            for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
-                trans_date = parse(row['Date'], dayfirst=True).date()
-                trans_desc = row['Description']
-                # Pekao use periods to separate thousands and commas to separate integer with decimal numbers
-                # As beancount's D function doesn't support this yet (https://github.com/beancount/beancount/issues/204)
-                # it is simpler to just replace the commas with periods in the amount's column
-                trans_amt = row['Amount'].replace(",", ".")
-
-                #trans_date = parse(row[1]).date()
-                #trans_desc = row[2]
-                #trans_amt = row[5]
-
-                #trans_date = parse(row['Transaction date']).date()
-                #trans_desc = row['Transaction Type'] + ' ' + row['Description']
-                #if row['Debits']:
-                #    trans_amt = row['Debits']
-                #else:
-                #    trans_amt = row['Credits']
-
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'EUR'),
-                            None, None, None, None)
-                        )
-                
-                entries.append(txn)
-
-        return entries

@@ -23,10 +23,11 @@ import sys
 sys.path.append(os.path.dirname(__file__))
 
 import bankmillennium
-import santanderpolska
+import erstepolska
 import kraken
 import n26
 import paypal
+import pekao
 import revolut
 import wise
 
@@ -34,8 +35,8 @@ CONFIG = [
         #bankmillennium.MillenniumPLNImporter('Assets:Bank-Millennium', '0000'),
         #bankmillennium.MillenniumEURImporter('Assets:Bank-Millennium', '0000'),
         #bankmillennium.MillenniumUSDImporter('Assets:Bank-Millennium', '0000'),
-        erstepolska.ErstePolskaImporter('Assets:Bank-Erste-Gianluca', '0000'),
-        erstepolska.ErstePolskaEURImporter('Assets:Bank-Erste-Gianluca', '0000'),
+        #erstepolska.ErstePolskaImporter('Assets:Bank-Erste-Gianluca', '0000'),
+        #erstepolska.ErstePolskaEURImporter('Assets:Bank-Erste-Gianluca', '0000'),
         #erstepolska.ErstePolskaImporter('Assets:Bank-Erste-Sylwia', '0000'),
         #erstepolska.ErstePolskaEURImporter('Assets:Bank-Erste-Sylwia', '0000'),
         #kraken.KrakenLedgerImporter('Assets:Kraken', '0000'),
@@ -43,7 +44,6 @@ CONFIG = [
         #n26.N26Importer('Assets:N26', '0000'),
         #paypal.PaypalImporter('Assets:Paypal', '0000'),
         pekao.PekaoImporter('Assets:Pekao', '0000'),
-        pekao.PekaoEURImporter('Assets:Pekao", '0000'),
         #revolut.RevolutUSDImporter('Assets:Revolut', '0000'),
         #revolut.RevolutPLNImporter('Assets:Revolut', '0000'),
         #revolut.RevolutEURImporter('Assets:Revolut', '0000'),

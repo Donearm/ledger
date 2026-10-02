@@ -12,7 +12,7 @@ _unless otherwise specified, the date is always included_
 * Pekao: 2026-09-06
 * Revolut: 2026-09-02
 * Revolut-Sylwia: never
-* Wise: 2026-09-02
+* Wise: 2026-10-02
 
 === URLs
 

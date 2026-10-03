@@ -2,196 +2,154 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022, Gianluca Fiore
+# Copyright (c) 2022-2026, Gianluca Fiore
 #
 ###############################################################################
 
 __author__ = "Gianluca Fiore"
-__copyright__ = ""
-__credits__ = ""
-__license__ = ""
-__version__ = ""
-__mantainer__ = ""
-__date__ = ""
-__email__ = ""
-__status__ = ""
 
+from beancount.core import data, amount, flags
 from beancount.core.number import D
-from beancount.ingest import importer
-from beancount.core import account, amount, flags, data
-from beancount.core.position import Cost
-
-from dateutil.parser import parse
-
+from beangulp.importer import Importer
+from dateutil.parser import parse, ParserError
+from datetime import date
 import csv
 import os
 import re
+from typing import Optional
 
-class WisePLNImporter(importer.ImporterProtocol):
-    def __init__(self, account, lastfour):
-        self.account = account
+class _WiseBase(Importer):
+    """Shared base for Wise importers (multi-currency support)."""
+    
+    def __init__(self, account, lastfour, currency):
+        self._account = account
         self.lastfour = lastfour
+        self.currency = currency
 
-    def identify(self, f):
-        """Regular expression to match Wise csv export's filename"""
+    def name(self) -> str:
+        return f"Wise_{self.lastfour}_{self.currency}"
 
-        return re.match('transaction-history_PLN_[0-9-_]*\\.csv', os.path.basename(f.name))
+    def account(self, filepath: str) -> str:
+        """Required by beangulp Importer."""
+        return self._account
 
-    def extract(self, f):
+    def date(self, filepath: str) -> Optional[date]:
+        """Extract transaction date from file."""
+        try:
+            with open(filepath, encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                first_row = next(reader, None)
+                if first_row and first_row.get('Date'):
+                    return parse(first_row['Date'], dayfirst=True).date()
+        except (FileNotFoundError, ParserError):
+            pass
+        return None
+
+    def filename(self, filepath: str) -> str:
+        return os.path.basename(filepath)
+
+    def _extract_rows(self, filepath, currency):
         entries = []
 
-        with open(f.name) as f:
+        with open(filepath, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
-                # dayfirst option must be present as the date format of Wise is %d-%m-%Y
-                trans_date = parse(row['Date'], dayfirst=True).date()
-                trans_desc = row['Description']
-                trans_amt = row['Amount']
+                try:
+                    date_str = row.get('Date')
+                    if not date_str:
+                        continue
+                    # Wise uses DD-MM-YYYY format
+                    trans_date = parse(date_str, dayfirst=True).date()
+                except ParserError:
+                    continue
+                
+                trans_desc = row.get('Description', '') or ''
+                trans_amt_str = row.get('Amount', '') or ''
 
-                meta = data.new_metadata(f.name, index)
+                meta = data.new_metadata(filepath, index)
 
                 txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
+                    meta=meta,
+                    date=trans_date,
+                    flag=flags.FLAG_OKAY,
+                    payee=trans_desc,
+                    narration="",
+                    tags=set(),
+                    links=set(),
+                    postings=[
+                        data.Posting(
+                            account=self._account,
+                            units=amount.Amount(D(trans_amt_str), currency),
+                            cost=None,
+                            price=None,
+                            flag=None,
+                            meta=None
                         )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'PLN'),
-                            None, None, None, None)
-                        )
-                
+                    ],
+                )
                 entries.append(txn)
 
         return entries
 
 
-class WiseEURImporter(importer.ImporterProtocol):
+class WisePLNImporter(_WiseBase):
+    """Importer for Wise PLN account CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
+        super().__init__(account, lastfour, 'PLN')
+        self.file_pattern = r'statement_1684353_PLN_[0-9-_]*\.csv'
 
-    def identify(self, f):
-        """Regular expression to match Wise csv export's filename"""
+    def identify(self, filepath: str) -> bool:
+        """Match Wise PLN CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(self.file_pattern, basename))
 
-        return re.match('transaction-history_EUR_[0-9-_]*\\.csv', os.path.basename(f.name))
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath, self.currency)
 
-    def extract(self, f):
-        entries = []
 
-        with open(f.name, encoding='utf-8-sig') as f:
-            for index, row in enumerate(csv.DictReader(f)):
-                # dayfirst option must be present as the date format of Wise is %d-%m-%Y
-                trans_date = parse(row['Created on'], dayfirst=True).date()
-                trans_desc = row['Target name']
-                trans_amt = row['Target amount (after fees)']
-
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'EUR'),
-                            None, None, None, None)
-                        )
-                
-                entries.append(txn)
-
-        return entries
-
-class WiseUSDImporter(importer.ImporterProtocol):
+class WiseEURImporter(_WiseBase):
+    """Importer for Wise EUR account CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
+        super().__init__(account, lastfour, 'EUR')
+        self.file_pattern = r'statement_2476408_EUR_[0-9-_]*\.csv'
 
-    def identify(self, f):
-        """Regular expression to match Wise csv export's filename"""
+    def identify(self, filepath: str) -> bool:
+        """Match Wise EUR CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(self.file_pattern, basename))
 
-        return re.match('transaction-history_USD_[0-9-_]*\\.csv', os.path.basename(f.name))
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath, self.currency)
 
-    def extract(self, f):
-        entries = []
 
-        with open(f.name) as f:
-            for index, row in enumerate(csv.DictReader(f)):
-                # dayfirst option must be present as the date format of Wise is %d-%m-%Y
-                trans_date = parse(row['Date'], dayfirst=True).date()
-                trans_desc = row['Description']
-                trans_amt = row['Amount']
-
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'USD'),
-                            None, None, None, None)
-                        )
-                
-                entries.append(txn)
-
-        return entries
-
-class WiseIDRImporter(importer.ImporterProtocol):
+class WiseUSDImporter(_WiseBase):
+    """Importer for Wise USD account CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
+        super().__init__(account, lastfour, 'USD')
+        self.file_pattern = r'statement_2100952_USD_[0-9-_]*\.csv'
 
-    def identify(self, f):
-        """Regular expression to match Wise csv export's filename"""
+    def identify(self, filepath: str) -> bool:
+        """Match Wise USD CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(self.file_pattern, basename))
 
-        return re.match('transaction-history_IDR_[0-9-_]*\\.csv', os.path.basename(f.name))
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath, self.currency)
 
-    def extract(self, f):
-        entries = []
 
-        with open(f.name) as f:
-            for index, row in enumerate(csv.DictReader(f)):
-                # dayfirst option must be present as the date format of Wise is %d-%m-%Y
-                trans_date = parse(row['Date'], dayfirst=True).date()
-                trans_desc = row['Description']
-                trans_amt = row['Amount']
+class WiseIDRImporter(_WiseBase):
+    """Importer for Wise IDR account CSV exports."""
+    
+    def __init__(self, account, lastfour):
+        super().__init__(account, lastfour, 'IDR')
+        self.file_pattern = r'statement_39423616_IDR_[0-9-_]*\.csv'
 
-                meta = data.new_metadata(f.name, index)
+    def identify(self, filepath: str) -> bool:
+        """Match Wise IDR CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(self.file_pattern, basename))
 
-                txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'IDR'),
-                            None, None, None, None)
-                        )
-                
-                entries.append(txn)
-
-        return entries
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath, self.currency)

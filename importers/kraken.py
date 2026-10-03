@@ -2,123 +2,148 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022, Gianluca Fiore
+# Copyright (c) 2022-2026, Gianluca Fiore
 #
 ###############################################################################
 
 __author__ = "Gianluca Fiore"
-__copyright__ = ""
-__credits__ = ""
-__license__ = ""
-__version__ = ""
-__mantainer__ = ""
-__date__ = ""
+__copyright__ = "Copyright (c) 2022-2026, Gianluca Fiore"
+__credits__ = []
+__license__ = "MIT"
+__version__ = "1.1.0"
+__maintainer__ = "Gianluca Fiore"
+__date__ = "2026"
 __email__ = ""
-__status__ = ""
+__status__ = "Production"
 
+from beancount.core import data, amount, flags
 from beancount.core.number import D
-from beancount.ingest import importer
-from beancount.core import account, amount, flags, data
-from beancount.core.position import Cost
-
+from beangulp.importer import Importer
 from dateutil.parser import parse
-
+from datetime import date
 import csv
 import os
 import re
+from typing import Optional
 
-class KrakenLedgerImporter(importer.ImporterProtocol):
-    def __init__(self, account, lastfour):
-        self.account = account
+class _KrakenBase(Importer):
+    """Shared base for Kraken importers."""
+    
+    def __init__(self, account, lastfour, file_pattern):
+        self._account = account
         self.lastfour = lastfour
+        self.file_pattern = file_pattern
 
-    def identify(self, f):
-        """Regular expression to match Kraken ledger csv export's filename"""
+    def name(self) -> str:
+        return f"Kraken_{self.lastfour}"
 
-        return re.match('ledgers\.csv', os.path.basename(f.name))
+    def account(self, filepath: str) -> str:
+        """Required by beangulp Importer."""
+        return self._account
 
-    def extract(self, f):
+    def date(self, filepath: str) -> Optional[date]:
+        """Extract transaction date from file."""
+        try:
+            with open(filepath, encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                first_row = next(reader, None)
+                if first_row and first_row.get('time'):
+                    return parse(first_row['time']).date()
+        except (FileNotFoundError, ValueError):
+            pass
+        return None
+
+    def filename(self, filepath: str) -> str:
+        return os.path.basename(filepath)
+
+    def _extract_ledger(self, filepath):
+        """Common extraction logic for ledger/trade files."""
         entries = []
 
-        with open(f.name) as f:
+        with open(filepath, encoding='utf-8') as f:
             for index, row in enumerate(csv.DictReader(f)):
-                print(index, row)
                 trans_date = parse(row['time']).date()
-                #trans_desc = row['type'] + ' ' + row['txid'] or row['refid']
-
-                # In some Kraken's entries, the withdrawals for instance, there's no txid but only a refid column
-                # 'type' is always the action performed (trade/deposit/withdrawal)
-                if row['txid']:
-                    trans_desc = row['type'] + ' ' + row['txid']
+                
+                # Handle withdrawals that may have txid or refid
+                txid = row.get('txid') or ''
+                refid = row.get('refid') or ''
+                trans_type = row.get('type', '')
+                
+                if txid:
+                    trans_desc = f"{trans_type} {txid}"
                 else:
-                    trans_desc = row['type'] + ' ' + row['refid']
+                    trans_desc = f"{trans_type} {refid}"
 
-                trans_amt = row['amount']
-                trans_asset = row['asset']
-                trans_fees = row['fee']
+                trans_amt = row.get('amount', '')
+                trans_asset = row.get('asset', 'XXX')
+                trans_fee = row.get('fee', '0')
 
-                meta = data.new_metadata(f.name, index)
+                meta = data.new_metadata(filepath, index)
 
                 txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
+                    meta=meta,
+                    date=trans_date,
+                    flag=flags.FLAG_OKAY,
+                    payee=trans_desc,
+                    narration=row.get('descr', ''),
+                    tags=set(),
+                    links=set(),
+                    postings=[],
+                )
 
+                # Main posting
                 txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), trans_asset),
-                            None, None, None, None)
+                    data.Posting(
+                        account=self._account,
+                        units=amount.Amount(D(trans_amt), trans_asset),
+                        cost=None,
+                        price=None,
+                        flag=None,
+                        meta=None
+                    )
+                )
+                
+                # Fee posting if applicable
+                if float(trans_fee) != 0:
+                    txn.postings.append(
+                        data.Posting(
+                            account="Expenses:Trading:Fees",
+                            units=amount.Amount(D(trans_fee), trans_asset),
+                            cost=None,
+                            price=None,
+                            flag=None,
+                            meta=None
                         )
+                    )
                 
                 entries.append(txn)
 
         return entries
 
-class KrakenTradeImporter(importer.ImporterProtocol):
+class KrakenLedgerImporter(_KrakenBase):
+    """Importer for Kraken ledger CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
+        super().__init__(account, lastfour, r'ledgers\.csv')
 
-    def identify(self, f):
-        """Regular expression to match Kraken trades csv export's filename"""
+    def identify(self, filepath: str) -> bool:
+        """Match Kraken ledger CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(self.file_pattern, basename))
 
-        return re.match('trades\.csv', os.path.basename(f.name))
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_ledger(filepath)
 
-    def extract(self, f):
-        entries = []
+class KrakenTradeImporter(_KrakenBase):
+    """Importer for Kraken trades CSV exports."""
+    
+    def __init__(self, account, lastfour):
+        super().__init__(account, lastfour, r'trades\.csv')
 
-        with open(f.name) as f:
-            for index, row in enumerate(csv.DictReader(f)):
-                print(index, row)
-                trans_date = parse(row['time']).date()
-                trans_desc = row['type'] + ' ' + row['ordertype'] + ' ' + row['txid']
-                trans_amt = row['vol']
-                trans_asset = row['pair']
-                trans_fees = row['fee']
+    def identify(self, filepath: str) -> bool:
+        """Match Kraken trades CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(self.file_pattern, basename))
 
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), trans_asset),
-                            None, None, None, None)
-                        )
-                
-                entries.append(txn)
-
-        return entries
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_ledger(filepath)

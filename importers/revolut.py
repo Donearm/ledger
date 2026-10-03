@@ -2,109 +2,73 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022, Gianluca Fiore
+# Copyright (c) 2022-2026, Gianluca Fiore
 #
 ###############################################################################
 
 __author__ = "Gianluca Fiore"
-__copyright__ = ""
-__credits__ = ""
-__license__ = ""
-__version__ = ""
-__mantainer__ = ""
-__date__ = ""
-__email__ = ""
-__status__ = ""
 
+from beancount.core import data, amount, flags
 from beancount.core.number import D
-from beancount.ingest import importer
-from beancount.core import account, amount, flags, data
-from beancount.core.position import Cost
-
+from beangulp.importer import Importer
 from dateutil.parser import parse, ParserError
-
+from datetime import date
 import csv
 import os
 import re
-import logging
+from typing import Optional
 
-LOG = logging.getLogger(__name__)
-
-
-def _make_identify_regex(currency):
-    # Accept both _en_ and _en-us_ (and similar), be case-insensitive for safety
-    return re.compile(r'^account-statement_[0-9\-_]*_en(?:-gb)?_[a-z0-9]*_{}\.csv$'.format(re.escape(currency)),
-                      flags=re.IGNORECASE)
-
-
-def _parse_amount(value):
-    """
-    Normalize amount strings:
-    - Remove whitespace
-    - Remove thousands separators (commas)
-    - Handle parentheses as negative amounts, e.g. (1,234.56)
-    """
-    if value is None:
-        return None
-    s = str(value).strip()
-    if s == '':
-        return None
-    # Remove any currency symbols or non-digit/.-() characters except minus/period/comma
-    # First detect parentheses for negative amounts
-    negative = False
-    if s.startswith('(') and s.endswith(')'):
-        negative = True
-        s = s[1:-1].strip()
-    # Remove thousands separator commas
-    s = s.replace(',', '')
-    # If there's still any stray characters, try to keep digits, dot and minus
-    s = re.sub(r'[^0-9\.\-]', '', s)
-    if s == '':
-        return None
-    if negative and not s.startswith('-'):
-        s = '-' + s
-    return s
-
-
-class RevolutPLNImporter(importer.ImporterProtocol):
-    def __init__(self, account, lastfour):
-        self.account = account
+class _RevolutBase(Importer):
+    """Shared base for Revolut importers (multi-currency support)."""
+    
+    def __init__(self, account, lastfour, currency):
+        self._account = account
         self.lastfour = lastfour
+        self.currency = currency
         self.headers = ['Type', 'Product', 'Started Date', 'Completed Date', 'Description', 'Amount', 'Fee', 'Currency', 'State', 'Balance']
-        self._identify_re = _make_identify_regex('PLN')
 
-    def identify(self, f):
-        """Match Revolut csv export's filename for PLN files"""
-        return bool(self._identify_re.match(os.path.basename(f.name)))
+    def name(self) -> str:
+        return f"Revolut_{self.lastfour}_{self.currency}"
 
-    def extract(self, f):
+    def account(self, filepath: str) -> str:
+        """Required by beangulp Importer."""
+        return self._account
+
+    def date(self, filepath: str) -> Optional[date]:
+        """Extract transaction date from file."""
+        try:
+            with open(filepath, encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f, fieldnames=self.headers)
+                next(reader)  # Skip header
+                first_row = next(reader, None)
+                if first_row and first_row.get('Completed Date'):
+                    return parse(first_row['Completed Date']).date()
+        except (FileNotFoundError, ParserError):
+            pass
+        return None
+
+    def filename(self, filepath: str) -> str:
+        return os.path.basename(filepath)
+
+    def _extract_rows(self, filepath):
         entries = []
 
-        with open(f.name, encoding='utf-8-sig') as fh:
-            reader = csv.DictReader(fh)
+        with open(filepath, encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f, fieldnames=self.headers)
+            
             for index, row in enumerate(reader):
-                # skip empty rows
-                if not any(row.values()):
-                    continue
-
-                date_text = row.get('Completed Date') or row.get('Completed date') or row.get('CompletedDate')
-                if not date_text:
-                    LOG.debug("Skipping row %s: missing Completed Date: %r", index, row)
-                    continue
                 try:
-                    trans_date = parse(date_text).date()
-                except (ParserError, ValueError) as e:
-                    LOG.warning("Skipping row %s in %s: cannot parse date %r: %s", index, f.name, date_text, e)
+                    completed_date_str = row.get('Completed Date')
+                    if not completed_date_str:
+                        continue
+                    trans_date = parse(completed_date_str).date()
+                except ParserError:
                     continue
+                
+                trans_desc = row.get('Description', '') or ''
+                trans_amt_str = row.get('Amount', '') or ''
 
-                trans_desc = (row.get('Description') or '').strip()
-                trans_amt_raw = row.get('Amount') or ''
-                parsed_amt = _parse_amount(trans_amt_raw)
-                if parsed_amt is None:
-                    LOG.debug("Skipping row %s: cannot parse amount %r", index, trans_amt_raw)
-                    continue
-
-                meta = data.new_metadata(f.name, index)
+                meta = data.new_metadata(filepath, index)
 
                 txn = data.Transaction(
                     meta=meta,
@@ -114,189 +78,77 @@ class RevolutPLNImporter(importer.ImporterProtocol):
                     narration="",
                     tags=set(),
                     links=set(),
-                    postings=[],
+                    postings=[
+                        data.Posting(
+                            account=self._account,
+                            units=amount.Amount(D(trans_amt_str), self.currency),
+                            cost=None,
+                            price=None,
+                            flag=None,
+                            meta=None
+                        )
+                    ],
                 )
-
-                txn.postings.append(
-                    data.Posting(self.account, amount.Amount(D(parsed_amt), 'PLN'),
-                                 None, None, None, None)
-                )
-
                 entries.append(txn)
 
         return entries
 
 
-class RevolutEURImporter(importer.ImporterProtocol):
+class RevolutPLNImporter(_RevolutBase):
+    """Importer for Revolut PLN account CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
-        self._identify_re = _make_identify_regex('EUR')
+        super().__init__(account, lastfour, 'PLN')
 
-    def identify(self, f):
-        """Match Revolut csv export's filename for EUR files"""
-        return bool(self._identify_re.match(os.path.basename(f.name)))
+    def identify(self, filepath: str) -> bool:
+        """Match Revolut PLN CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(r'account-statement_[0-9-_]*_en-us_[a-z0-9]*_PLN.csv', basename))
 
-    def extract(self, f):
-        entries = []
-
-        with open(f.name, encoding='utf-8-sig') as fh:
-            for index, row in enumerate(csv.DictReader(fh)):
-                if not any(row.values()):
-                    continue
-
-                date_text = row.get('Completed Date') or row.get('Completed date') or row.get('CompletedDate')
-                if not date_text:
-                    LOG.debug("Skipping row %s: missing Completed Date: %r", index, row)
-                    continue
-                try:
-                    trans_date = parse(date_text).date()
-                except (ParserError, ValueError) as e:
-                    LOG.warning("Skipping row %s in %s: cannot parse date %r: %s", index, f.name, date_text, e)
-                    continue
-
-                trans_desc = (row.get('Description') or '').strip()
-                trans_amt_raw = row.get('Amount') or ''
-                parsed_amt = _parse_amount(trans_amt_raw)
-                if parsed_amt is None:
-                    LOG.debug("Skipping row %s: cannot parse amount %r", index, trans_amt_raw)
-                    continue
-
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                    meta=meta,
-                    date=trans_date,
-                    flag=flags.FLAG_OKAY,
-                    payee=trans_desc,
-                    narration="",
-                    tags=set(),
-                    links=set(),
-                    postings=[],
-                )
-
-                txn.postings.append(
-                    data.Posting(self.account, amount.Amount(D(parsed_amt), 'EUR'),
-                                 None, None, None, None)
-                )
-
-                entries.append(txn)
-
-        return entries
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath)
 
 
-class RevolutUSDImporter(importer.ImporterProtocol):
+class RevolutEURImporter(_RevolutBase):
+    """Importer for Revolut EUR account CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
-        self._identify_re = _make_identify_regex('USD')
+        super().__init__(account, lastfour, 'EUR')
 
-    def identify(self, f):
-        """Match Revolut csv export's filename for USD files"""
-        return bool(self._identify_re.match(os.path.basename(f.name)))
+    def identify(self, filepath: str) -> bool:
+        """Match Revolut EUR CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(r'account-statement_[0-9-_]*_en-us_[a-z0-9]*_EUR.csv', basename))
 
-    def extract(self, f):
-        entries = []
-
-        with open(f.name, encoding='utf-8-sig') as fh:
-            for index, row in enumerate(csv.DictReader(fh)):
-                if not any(row.values()):
-                    continue
-
-                date_text = row.get('Completed Date') or row.get('Completed date') or row.get('CompletedDate')
-                if not date_text:
-                    LOG.debug("Skipping row %s: missing Completed Date: %r", index, row)
-                    continue
-                try:
-                    trans_date = parse(date_text).date()
-                except (ParserError, ValueError) as e:
-                    LOG.warning("Skipping row %s in %s: cannot parse date %r: %s", index, f.name, date_text, e)
-                    continue
-
-                trans_desc = (row.get('Description') or '').strip()
-                trans_amt_raw = row.get('Amount') or ''
-                parsed_amt = _parse_amount(trans_amt_raw)
-                if parsed_amt is None:
-                    LOG.debug("Skipping row %s: cannot parse amount %r", index, trans_amt_raw)
-                    continue
-
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                    meta=meta,
-                    date=trans_date,
-                    flag=flags.FLAG_OKAY,
-                    payee=trans_desc,
-                    narration="",
-                    tags=set(),
-                    links=set(),
-                    postings=[],
-                )
-
-                txn.postings.append(
-                    data.Posting(self.account, amount.Amount(D(parsed_amt), 'USD'),
-                                 None, None, None, None)
-                )
-
-                entries.append(txn)
-
-        return entries
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath)
 
 
-class RevolutTRYImporter(importer.ImporterProtocol):
+class RevolutUSDImporter(_RevolutBase):
+    """Importer for Revolut USD account CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
-        self._identify_re = _make_identify_regex('TRY')
+        super().__init__(account, lastfour, 'USD')
 
-    def identify(self, f):
-        """Match Revolut csv export's filename for TRY files"""
-        return bool(self._identify_re.match(os.path.basename(f.name)))
+    def identify(self, filepath: str) -> bool:
+        """Match Revolut USD CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(r'account-statement_[0-9-_]*_en-us_[a-z0-9]*_USD.csv', basename))
 
-    def extract(self, f):
-        entries = []
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath)
 
-        with open(f.name, encoding='utf-8-sig') as fh:
-            for index, row in enumerate(csv.DictReader(fh)):
-                if not any(row.values()):
-                    continue
 
-                # Fixed typo: use 'Completed Date'
-                date_text = row.get('Completed Date') or row.get('Completed date') or row.get('CompletedDate')
-                if not date_text:
-                    LOG.debug("Skipping row %s: missing Completed Date: %r", index, row)
-                    continue
-                try:
-                    trans_date = parse(date_text).date()
-                except (ParserError, ValueError) as e:
-                    LOG.warning("Skipping row %s in %s: cannot parse date %r: %s", index, f.name, date_text, e)
-                    continue
+class RevolutTRYImporter(_RevolutBase):
+    """Importer for Revolut TRY account CSV exports."""
+    
+    def __init__(self, account, lastfour):
+        super().__init__(account, lastfour, 'TRY')
 
-                trans_desc = (row.get('Description') or '').strip()
-                trans_amt_raw = row.get('Amount') or ''
-                parsed_amt = _parse_amount(trans_amt_raw)
-                if parsed_amt is None:
-                    LOG.debug("Skipping row %s: cannot parse amount %r", index, trans_amt_raw)
-                    continue
+    def identify(self, filepath: str) -> bool:
+        """Match Revolut TRY CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(r'account-statement_[0-9-_]*_en_TRY_[a-z0-9]*\.csv', basename))
 
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                    meta=meta,
-                    date=trans_date,
-                    flag=flags.FLAG_OKAY,
-                    payee=trans_desc,
-                    narration="",
-                    tags=set(),
-                    links=set(),
-                    postings=[],
-                )
-
-                txn.postings.append(
-                    data.Posting(self.account, amount.Amount(D(parsed_amt), 'TRY'),
-                                 None, None, None, None)
-                )
-
-                entries.append(txn)
-
-        return entries
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath)

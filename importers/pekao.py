@@ -7,94 +7,170 @@
 ###############################################################################
 
 __author__ = "Gianluca Fiore"
-__copyright__ = ""
-__credits__ = ""
-__license__ = ""
-__version__ = ""
-__maintainer__ = ""
-__date__ = ""
+__copyright__ = "Copyright (c) 2026, Gianluca Fiore"
+__credits__ = []
+__license__ = "MIT"
+__version__ = "1.1.0"
+__maintainer__ = "Gianluca Fiore"
+__date__ = "2026"
 __email__ = ""
-__status__ = ""
+__status__ = "Production"
 
 from beancount.core.number import D
-from beancount.ingest import importer
-from beancount.core import account, amount, flags, data
+from beancount.core import amount, flags, data
 from beancount.core.position import Cost
 
+from beangulp.importer import Importer
+
+from datetime import date
 from dateutil.parser import parse
 
 import csv
 import os
 import re
+from typing import List, Optional, Set, Tuple
 
-class PekaoImporter(importer.ImporterProtocol):
-    def __init__(self, account, lastfour):
-        self.account = account
+class PekaoImporter(Importer):
+    """Beancount importer for Bank Pekao CSV exports (beancount v3 compatible).
+    
+    Migrates from beancount.ingest to beangulp framework.
+    See: https://sgoel.dev/posts/moving-from-beancount-2x-to-3x/
+    """
+    
+    def __init__(self, account: str, lastfour: str) -> None:
+        self._account = account
         self.lastfour = lastfour
-        self.headers = ['Data księgowania', 'Data waluty', 'Nadawca / Odbiorca', 'Adres nadawcy / odbiorcy', 'Rachunek źródłowy', 'Rachunek docelowy', 'Tytułem', 'Kwota operacji', 'Waluta', 'Numer referencyjny','Typ operacji', 'Kategoria']
+        self.headers = [
+            'Data księgowania', 'Data waluty', 'Nadawca / Odbiorca',
+            'Adres nadawcy / odbiorcy', 'Rachunek źródłowy', 'Rachunek docelowy',
+            'Tytułem', 'Kwota operacji', 'Waluta', 'Numer referencyjny',
+            'Typ operacji', 'Kategoria'
+        ]
 
-    def identify(self, f):
-        """Regular expression to match the Bank Pekao csv export's filename"""
+    def name(self) -> str:
+        """Return importer name."""
+        return f"Pekao_{self.lastfour}"
 
-        return re.match('Lista_operacji_[0-9]*_[0-9]*\\.csv', os.path.basename(f.name))
+    def account(self, filepath: str) -> str:
+        """Required by beangulp Importer - takes filepath argument."""
+        return self._account
+
+    def identify(self, filepath: str) -> bool:
+        """Match Bank Pekao CSV export filenames."""
+        basename = os.path.basename(filepath)
+        return bool(re.match(r'Lista_operacji_[0-9]*_[0-9]*\.csv', basename))
+
+    def date(self, filepath: str) -> Optional[date]:
+        """Extract transaction date from file.
+        
+        Returns the valuation date from the first transaction.
+        """
+        try:
+            with open(filepath, encoding='utf-8') as f:
+                reader = csv.DictReader(f, delimiter=';', fieldnames=self.headers)
+                next(reader)  # Skip header
+                first_row = next(reader, None)
+                if first_row and first_row.get('Data waluty'):
+                    return parse(first_row['Data waluty'], dayfirst=True).date()
+        except (FileNotFoundError, ValueError):
+            pass
+        return None
+
+    def filename(self, filepath: str) -> str:
+        """Return the original filename."""
+        return os.path.basename(filepath)
 
     @staticmethod
-    def _clean(text):
-        """Locale-normalise a Polish-formatted decimal string for beancount to understand"""
+    def _clean(text: Optional[str]) -> Optional[str]:
+        """Convert Polish decimal format (comma) to beancount format (dot)."""
         if text is None:
             return None
-        return (text.replace('\xa0', '')
+        return (text.replace('\xa0', '')  # Non-breaking space
                     .replace(' ', '')
                     .replace('+', '')
                     .replace(',', '.'))
 
-    def extract(self, f):
-        entries = []
+    @staticmethod
+    def _build_narration(row: dict) -> str:
+        """Build narration from available fields."""
+        counterparty = row.get('Nadawca / Odbiorca', '') or ''
+        operation_type = row.get('Typ operacji', '') or ''
+        
+        if operation_type and counterparty:
+            return f"{counterparty} | {operation_type}"
+        elif counterparty:
+            return counterparty
+        else:
+            return row.get('Tytułem', '') or ''
 
-        with open(f.name) as f:
-            #for index, row in enumerate(csv.DictReader(f)):
-            # Here delimiter is necessary because Pekao uses ; instead of , as separator...
-            for index, row in enumerate(csv.DictReader(f, delimiter=';', fieldnames=self.headers)):
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        """Extract transactions from a CSV file.
+        
+        Args:
+            filepath: String path to CSV file
+            existing: Existing entries (for duplicate detection if needed)
+            
+        Returns:
+            List of Transaction objects
+        """
+        entries: data.Entries = []
 
+        with open(filepath, encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter=';', fieldnames=self.headers)
+            
+            for index, row in enumerate(reader):
                 if index == 0:
-                    # skip the embedded header line
+                    # Skip the embedded header line that's first in the file
                     continue
-                trans_date = parse(row['Data waluty'], dayfirst=True).date()
-                trans_desc = row['Tytułem'] or row['Nadawca / Odbiorca'] or ''
-                trans_amt = row['Kwota operacji']
-                if trans_amt is None:
+                
+                # Parse transaction date (use valuta date as this represents settlement)
+                valute_date_str = row.get('Data waluty')
+                if not valute_date_str:
+                    continue
+                    
+                try:
+                    trans_date = parse(valute_date_str, dayfirst=True).date()
+                except ValueError:
+                    continue
+                
+                # Build payee and narration
+                trans_desc = row.get('Tytułem') or row.get('Nadawca / Odbiorca') or ''
+                trans_amt_str = row.get('Kwota operacji')
+                
+                if trans_amt_str is None:
                     continue
 
-                #trans_date = parse(row[1]).date()
-                #trans_desc = row[2]
-                #trans_amt = row[5]
+                # Create metadata
+                meta = data.new_metadata(filepath, index + 1)
 
-                #trans_date = parse(row['Transaction date']).date()
-                #trans_desc = row['Transaction Type'] + ' ' + row['Description']
-                #if row['Debits']:
-                #    trans_amt = row['Debits']
-                #else:
-                #    trans_amt = row['Credits']
-
-                meta = data.new_metadata(f.name, index)
-
+                # Build transaction with explicit keyword arguments (v3 safety)
                 txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc.strip(),
-                        narration = row['Nadawca / Odbiorca'] + row['Typ operacji'] or "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
-
+                    meta=meta,
+                    date=trans_date,
+                    flag=flags.FLAG_OKAY,
+                    payee=trans_desc.strip(),
+                    narration=self._build_narration(row),
+                    tags=set(),
+                    links=set(),
+                    postings=[]
+                )
+                
+                # Clean amount and ensure PLN currency
+                cleaned_amount = self._clean(trans_amt_str)
+                if cleaned_amount is None:
+                    continue
+                    
                 txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(self._clean(trans_amt)), 'PLN'),
-                            None, None, None, None)
-                        )
+                    data.Posting(
+                        account=self._account,  # ← FIXED: was self.account()
+                        units=amount.Amount(D(cleaned_amount), 'PLN'),
+                        cost=None,
+                        price=None,
+                        flag=None,
+                        meta=None
+                    )
+                )
                 
                 entries.append(txn)
 
         return entries
-

@@ -2,71 +2,110 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022, Gianluca Fiore
+# Copyright (c) 2022-2026, Gianluca Fiore
 #
 ###############################################################################
 
 __author__ = "Gianluca Fiore"
-__copyright__ = ""
-__credits__ = ""
-__license__ = ""
-__version__ = ""
-__mantainer__ = ""
-__date__ = ""
+__copyright__ = "Copyright (c) 2022-2026, Gianluca Fiore"
+__credits__ = []
+__license__ = "MIT"
+__version__ = "1.1.0"
+__maintainer__ = "Gianluca Fiore"
+__date__ = "2026"
 __email__ = ""
-__status__ = ""
+__status__ = "Production"
 
+from beancount.core import data, amount, flags
 from beancount.core.number import D
-from beancount.ingest import importer
-from beancount.core import account, amount, flags, data
-from beancount.core.position import Cost
-
-from dateutil.parser import parse
-
+from beangulp.importer import Importer
+from dateutil.parser import parse, ParserError
+from datetime import date
 import csv
 import os
 import re
+from typing import Optional
 
-class PaypalImporter(importer.ImporterProtocol):
+class PaypalImporter(Importer):
+    """Beancount importer for PayPal CSV exports."""
+    
     def __init__(self, account, lastfour):
-        self.account = account
+        self._account = account
         self.lastfour = lastfour
 
-    def identify(self, f):
-        """Regular expression to match the Paypal csv export's filename"""
+    def name(self) -> str:
+        return f"PayPal_{self.lastfour}"
 
-        # Paypal exports needs to be renamed to this
-        return re.match('Paypal.csv', os.path.basename(f.name))
+    def account(self, filepath: str) -> str:
+        """Required by beangulp Importer."""
+        return self._account
 
-    def extract(self, f):
+    def identify(self, filepath: str) -> bool:
+        """Match PayPal CSV export filenames.
+        
+        Note: PayPal exports need to be renamed to exactly 'Paypal.csv'
+        """
+        basename = os.path.basename(filepath)
+        return bool(re.match(r'Paypal\.csv', basename))
+
+    def date(self, filepath: str) -> Optional[date]:
+        """Extract transaction date from file."""
+        try:
+            with open(filepath, encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                first_row = next(reader, None)
+                if first_row and first_row.get('Date'):
+                    return parse(first_row['Date']).date()
+        except (FileNotFoundError, ParserError):
+            pass
+        return None
+
+    def filename(self, filepath: str) -> str:
+        return os.path.basename(filepath)
+
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
         entries = []
 
-        # opening the Paypal file with this encoding as otherwise there's a \ufeff character at the beginning that doesn't make the 'Date' key being recognized by DictReader
-        with open(f.name, encoding='utf-8-sig') as f:
+        # UTF-8-BOM encoding to handle \ufeff character at the beginning
+        with open(filepath, encoding='utf-8-sig') as f:
             for index, row in enumerate(csv.DictReader(f)):
-                trans_date = parse(row['Date']).date()
-                trans_desc = row['Bank Name'] + ' ' + row['Bank Account'] + ' ' + row['Description']
-                trans_amt = row['Net']
-                trans_currency = row['Currency']
+                try:
+                    date_str = row.get('Date', '')
+                    if not date_str:
+                        continue
+                    trans_date = parse(date_str).date()
+                except ParserError:
+                    continue
+                
+                bank_name = row.get('Bank Name', '') or ''
+                bank_account = row.get('Bank Account', '') or ''
+                description = row.get('Description', '') or ''
+                trans_desc = ' '.join(filter(None, [bank_name, bank_account, description]))
+                
+                trans_amt_str = row.get('Net', '')
+                trans_currency = row.get('Currency', 'USD')
 
-                meta = data.new_metadata(f.name, index)
+                meta = data.new_metadata(filepath, index)
 
                 txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
+                    meta=meta,
+                    date=trans_date,
+                    flag=flags.FLAG_OKAY,
+                    payee=trans_desc,
+                    narration='',
+                    tags=set(),
+                    links=set(),
+                    postings=[
+                        data.Posting(
+                            account=self._account,
+                            units=amount.Amount(D(trans_amt_str), trans_currency),
+                            cost=None,
+                            price=None,
+                            flag=None,
+                            meta=None
                         )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), trans_currency),
-                            None, None, None, None)
-                        )
-
+                    ],
+                )
                 entries.append(txn)
 
         return entries

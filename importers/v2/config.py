@@ -2,17 +2,25 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022-2026, Gianluca Fiore
+# Copyright (c) 2022, Gianluca Fiore
 #
 ###############################################################################
+
+__author__ = "Gianluca Fiore"
+__copyright__ = ""
+__credits__ = ""
+__license__ = ""
+__version__ = ""
+__mantainer__ = ""
+__date__ = ""
+__email__ = ""
+__status__ = ""
 
 import os
 import sys
 
 # beancount doesn't run from this directory
 sys.path.append(os.path.dirname(__file__))
-
-import beangulp
 
 import bankmillennium
 import erstepolska
@@ -43,9 +51,3 @@ CONFIG = [
         #wise.WisePLNImporter('Assets:Wise', '0000'),
         #wise.WiseUSDImporter('Assets:Wise', '0000'),
         ]
-
-HOOKS = []
-
-if __name__ == '__main__':
-    ingest = beangulp.Ingest(CONFIG, HOOKS)
-    ingest()

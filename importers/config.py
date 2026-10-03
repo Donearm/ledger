@@ -2,19 +2,9 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright (c) 2022, Gianluca Fiore
+# Copyright (c) 2022-2026, Gianluca Fiore
 #
 ###############################################################################
-
-__author__ = "Gianluca Fiore"
-__copyright__ = ""
-__credits__ = ""
-__license__ = ""
-__version__ = ""
-__mantainer__ = ""
-__date__ = ""
-__email__ = ""
-__status__ = ""
 
 import os
 import sys
@@ -22,11 +12,11 @@ import sys
 # beancount doesn't run from this directory
 sys.path.append(os.path.dirname(__file__))
 
+import beangulp
+
 import bankmillennium
 import erstepolska
-import kraken
 import n26
-import paypal
 import pekao
 import revolut
 import wise
@@ -43,11 +33,17 @@ CONFIG = [
         #kraken.KrakenTradeImporter('Assets:Kraken', '0000'),
         #n26.N26Importer('Assets:N26', '0000'),
         #paypal.PaypalImporter('Assets:Paypal', '0000'),
-        pekao.PekaoImporter('Assets:Bank-Pekao-Gianluca', '0000'),
-        #revolut.RevolutUSDImporter('Assets:Revolut', '0000'),
-        #revolut.RevolutPLNImporter('Assets:Revolut', '0000'),
-        #revolut.RevolutEURImporter('Assets:Revolut', '0000'),
+        #pekao.PekaoImporter('Assets:Bank-Pekao-Gianluca', '0000'),
+        revolut.RevolutUSDImporter('Assets:Revolut', '0000'),
+        revolut.RevolutPLNImporter('Assets:Revolut', '0000'),
+        revolut.RevolutEURImporter('Assets:Revolut', '0000'),
         #wise.WiseEURImporter('Assets:Wise', '0000'),
         #wise.WisePLNImporter('Assets:Wise', '0000'),
         #wise.WiseUSDImporter('Assets:Wise', '0000'),
         ]
+
+HOOKS = []
+
+if __name__ == '__main__':
+    ingest = beangulp.Ingest(CONFIG, HOOKS)
+    ingest()

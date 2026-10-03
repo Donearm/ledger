@@ -7,145 +7,92 @@
 ###############################################################################
 
 __author__ = "Gianluca Fiore"
-__copyright__ = ""
-__credits__ = ""
-__license__ = ""
-__version__ = ""
-__mantainer__ = ""
-__date__ = ""
-__email__ = ""
-__status__ = ""
 
+from beancount.core import data, amount, flags
 from beancount.core.number import D
-from beancount.ingest import importer
-from beancount.core import account, amount, flags, data
-from beancount.core.position import Cost
-
-from dateutil.parser import parse
-
+from beangulp.importer import Importer
+from datetime import datetime
 import csv
 import os
 import re
 
-class ErstePolskaImporter(importer.ImporterProtocol):
+class _ErsteBase(Importer):
+    """Shared base for Erste Polska importers (PLN and EUR variants)."""
+
     def __init__(self, account, lastfour):
-        self.account = account
+        self._account = account
         self.lastfour = lastfour
         self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
 
-    def identify(self, f):
-        """Regular expression to match the Bank Erste Polska csv export's filename"""
+    def name(self) -> str:
+        return f"ErstePolska_{self.lastfour}"
 
-        # Erste Polska doesn't make a difference between credit card's statements and saving account's ones in the name
-        # Therefore, the format is identical
-        return re.match('[nowa\s]?histor[iy]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*(_PLN)?\.csv', os.path.basename(f.name))
+    def account(self, filepath: str) -> str:
+        """Required by beangulp Importer - takes filepath argument."""
+        return self._account
 
-    def extract(self, f):
+    @staticmethod
+    def _clean(text):
+        """Convert Polish decimal comma to dot."""
+        return text.replace(",", ".")
+
+    def _extract_rows(self, filepath):
         entries = []
 
-        with open(f.name) as f:
-            #for index, row in enumerate(csv.DictReader(f)):
+        with open(filepath, encoding='utf-8') as f:
             for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
-                trans_date = parse(row['Date'], dayfirst=True).date()
+                if row['Date'] is None:
+                    continue
+
+                # Parse date (DD-MM-YYYY format)
+                trans_date = datetime.strptime(row['Date'].strip(), '%d-%m-%Y').date()
                 trans_desc = row['Description']
-                # Erste Polska use periods to separate thousands and commas to separate integer with decimal numbers
-                # As beancount's D function doesn't support this yet (https://github.com/beancount/beancount/issues/204)
-                # it is simpler to just replace the commas with periods in the amount's column
-                trans_amt = row['Amount'].replace(",", ".")
+                trans_amt = self._clean(row['Amount'])
 
-                #trans_date = parse(row[1]).date()
-                #trans_desc = row[2]
-                #trans_amt = row[5]
-
-                #trans_date = parse(row['Transaction date']).date()
-                #trans_desc = row['Transaction Type'] + ' ' + row['Description']
-                #if row['Debits']:
-                #    trans_amt = row['Debits']
-                #else:
-                #    trans_amt = row['Credits']
-
-                meta = data.new_metadata(f.name, index)
+                meta = data.new_metadata(filepath, index)
 
                 txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
+                    meta=meta,
+                    date=trans_date,
+                    flag=flags.FLAG_OKAY,
+                    payee=trans_desc,
+                    narration="",
+                    tags=set(),
+                    links=set(),
+                    postings=[
+                        data.Posting(
+                            account=self._account,
+                            units=amount.Amount(D(trans_amt), self.currency),
+                            cost=None,
+                            price=None,
+                            flag=None,
+                            meta=None
                         )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'PLN'),
-                            None, None, None, None)
-                        )
-                
+                    ],
+                )
                 entries.append(txn)
 
         return entries
 
-class ErstePolskaEURImporter(importer.ImporterProtocol):
-    def __init__(self, account, lastfour):
-        self.account = account
-        self.lastfour = lastfour
-        self.headers = ['Charge Date', 'Date', 'Description', None, None, 'Amount', 'Balance', 'Index']
+class ErstePolskaImporter(_ErsteBase):
+    """Importer for Erste Polska PLN account CSV exports."""
+    currency = 'PLN'
 
-    def identify(self, f):
-    #def identify(self, filepath: str):
+    def identify(self, filepath: str) -> bool:
         """Regular expression to match the Bank Erste Polska csv export's filename"""
+        return re.match('[nowa\s]?histor[iy]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*(_PLN)?\.csv', os.path.basename(filepath))
 
-        # Erste Polska doesn't make a difference between credit card's statements and saving account's ones in the name
-        # Therefore, the format is identical
-        # For EUR account, add '_EUR' at the end of filename to differentiate them from the PLN one
-        return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(f.name))
-        #return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(filepath))
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath)
 
-    def extract(self, f):
-    #def extract(self, filepath: str):
-        entries = []
 
-        with open(f.name) as f:
-        #with open(filepath) as f:
-            #for index, row in enumerate(csv.DictReader(f)):
-            for index, row in enumerate(csv.DictReader(f, fieldnames=self.headers)):
-                trans_date = parse(row['Date'], dayfirst=True).date()
-                trans_desc = row['Description']
-                # Erste Polska use periods to separate thousands and commas to separate integer with decimal numbers
-                # As beancount's D function doesn't support this yet (https://github.com/beancount/beancount/issues/204)
-                # it is simpler to just replace the commas with periods in the amount's column
-                trans_amt = row['Amount'].replace(",", ".")
+class ErstePolskaEURImporter(_ErsteBase):
+    """Importer for Erste Polska EUR account CSV exports."""
+    currency = 'EUR'
 
-                #trans_date = parse(row[1]).date()
-                #trans_desc = row[2]
-                #trans_amt = row[5]
+    def identify(self, filepath: str) -> bool:
+        """Regular expression to match the Bank Erste Polska csv export's filename"""
+        return re.match('[nowa\s]?histor[yi]a?_[0-9]*-[0-9]*-[0-9]*_[0-9]*_EUR\.csv', os.path.basename(filepath))
 
-                #trans_date = parse(row['Transaction date']).date()
-                #trans_desc = row['Transaction Type'] + ' ' + row['Description']
-                #if row['Debits']:
-                #    trans_amt = row['Debits']
-                #else:
-                #    trans_amt = row['Credits']
-
-                meta = data.new_metadata(f.name, index)
-
-                txn = data.Transaction(
-                        meta = meta,
-                        date = trans_date,
-                        flag = flags.FLAG_OKAY,
-                        payee = trans_desc,
-                        narration = "",
-                        tags = set(),
-                        links = set(),
-                        postings = [],
-                        )
-
-                txn.postings.append(
-                        data.Posting(self.account, amount.Amount(D(trans_amt), 'EUR'),
-                            None, None, None, None)
-                        )
-                
-                entries.append(txn)
-
-        return entries
+    def extract(self, filepath: str, existing: data.Entries) -> data.Entries:
+        return self._extract_rows(filepath)

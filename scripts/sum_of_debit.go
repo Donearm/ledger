@@ -68,9 +68,9 @@ func csvReader(path string) {
 	//case millenniumCsv.MatchString(base):
 	//  cfg = csvFormat{',', 7}
 	case santanderCsv.MatchString(base):
-		cfg = csvFormat{';', 5}
+		cfg = csvFormat{',', 5}
 	case santanderSelectCsv.MatchString(base):
-		cfg = csvFormat{';', 5}
+		cfg = csvFormat{',', 5}
 	case wiseCsv.MatchString(base):
 		cfg = csvFormat{',', 2}
 	case revolutCsv.MatchString(base):
